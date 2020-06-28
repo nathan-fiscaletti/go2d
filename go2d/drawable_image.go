@@ -38,6 +38,16 @@ func NewImageDrawable(c *canvas.Canvas, img image.Image) *ImageDrawable {
     }
 }
 
+func (this *ImageDrawable) GetImage() image.Image {
+    return this.gImg
+}
+
 func (this *ImageDrawable) Render() {
-    this.canvas.DrawImage(this.cImg, float64(this.Bounds.X), float64(this.Bounds.Y), float64(this.Bounds.Width), float64(this.Bounds.Height))
+    this.canvas.DrawImage(
+        this.cImg, 
+        float64(this.Bounds.X), 
+        float64(this.Bounds.Y), 
+        float64(this.Bounds.Width), 
+        float64(this.Bounds.Height),
+    )
 }
