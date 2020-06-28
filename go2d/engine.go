@@ -104,12 +104,12 @@ func (this *Engine) render() {
 	this.Canvas.SetFillStyle("#000")
     this.Canvas.FillRect(0, 0, w, h)
 
-    if this.scene.Render != nil {
-        this.scene.Render(this, this.scene)
-    }
-
     if this.scene.Update != nil {
         this.scene.Update(this, this.scene)
+    }
+
+    if this.scene.Render != nil {
+        this.scene.Render(this, this.scene)
     }
 
     this.renderMux.Unlock()
