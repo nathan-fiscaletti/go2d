@@ -11,17 +11,16 @@ type Vector struct {
 }
 
 func NewRandomVector(max Vector) Vector {
-	return NewFullRandomVector(Vector{
-		X: 0,
-		Y: 0,
-	}, max)
+	return NewRandomVectorWithin(
+        NewZeroRect(max.X, max.Y),
+    )
 }
 
-func NewFullRandomVector(min Vector, max Vector) Vector {
+func NewRandomVectorWithin(r Rect) Vector {
 	rand.Seed(time.Now().UnixNano())
 	return Vector{
-		X: rand.Intn(max.X-min.X) + min.X,
-		Y: rand.Intn(max.Y-min.Y) + min.Y,
+		X: rand.Intn(r.X+r.Width-r.X) + r.X,
+		Y: rand.Intn(r.Y+r.Height-r.Y) + r.Y,
 	}
 }
 
@@ -29,42 +28,42 @@ func NewZeroVector() Vector {
 	return Vector{}
 }
 
-func (this *Vector) Constrain(min Vector, max Vector) {
-	if this.X < min.X {
-		this.X = min.X
+func (this *Vector) ConstrainTo(r Rect) {
+	if this.X < r.X {
+		this.X = r.X
 	}
 
-	if this.Y < min.Y {
-		this.Y = min.Y
+	if this.Y < r.Y {
+		this.Y = r.Y
 	}
 
-	if this.X > max.X {
-		this.X = max.X
+	if this.X >= r.X + r.Width {
+		this.X = r.X + r.Width - 1
 	}
 
-	if this.Y > max.Y {
-		this.Y = max.Y
+	if this.Y >= r.Y + r.Width {
+		this.Y = r.Y + r.Width - 1
 	}
 }
 
-func (this *Vector) Constrained(min Vector, max Vector) Vector {
+func (this *Vector) Constrained(r Rect) Vector {
 	resX := this.X
 	resY := this.Y
 
-	if resX < min.X {
-		resX = min.X
+	if this.X < r.X {
+		resX = r.X
 	}
 
-	if resY < min.Y {
-		resY = min.Y
+	if this.Y < r.Y {
+		resY = r.Y
 	}
 
-	if resX > max.X {
-		resX = max.X
+	if this.X >= r.X + r.Width {
+		resX = r.X + r.Width - 1
 	}
 
-	if resY > max.Y {
-		resY = max.Y
+	if this.Y >= r.Y + r.Width {
+		resY = r.Y + r.Width - 1
 	}
 
 	return Vector{
@@ -108,6 +107,10 @@ func (this *Vector) DividedBy(v Vector) Vector {
 	}
 }
 
+func (this *Vector) IsInsideOf(r Rect) bool {
+    return r.Contains(*this)
+}
+
 func (this *Vector) IsLeftOf(v Vector) bool {
 	return this.X < v.X
 }
@@ -126,13 +129,6 @@ func (this *Vector) IsBelow(v Vector) bool {
 
 func (this *Vector) IsZero() bool {
 	return this.Y == 0 && this.X == 0
-}
-
-func (this *Vector) IsInsideOf(r Rect) bool {
-	return !(this.X < r.Position.X ||
-		this.Y < r.Position.Y ||
-		this.X > r.Position.X+r.Size.Width ||
-		this.Y > r.Position.Y+r.Size.Height)
 }
 
 func (this *Vector) Negative() Vector {

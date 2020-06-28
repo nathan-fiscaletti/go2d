@@ -7,12 +7,12 @@ import (
 )
 
 type SpriteSheet struct {
-	Image  *image.Image
+	Image  image.Image
 	Row    int
 	Column int
 }
 
-func (this *SpriteSheet) getSprite(location metrics.Vector) *image.Image {
+func (this *SpriteSheet) getSprite(location metrics.Vector) image.Image {
 	return this.Image.(interface {
 		SubImage(r image.Rectangle) image.Image
 	}).SubImage(

@@ -1,29 +1,50 @@
 package go2d
 
 import (
-	"fmt"
-	"time"
+    "time"
+    "sync"
 
-	"./metrics"
+    "./metrics"
+    //"./graphics"
+
 	"github.com/tfriedel6/canvas"
 	"github.com/tfriedel6/canvas/sdlcanvas"
 )
 
 type Engine struct {
-	MaxFPS int
-	MaxTPS int
+    Title             string
+	MaxTPS            int
+    Dimensions        metrics.Dimensions
+    OnTickRateUpdated func(int)
+    OnFPSUpdated      func(int)
+    Canvas            *canvas.Canvas
 
-	Dimensions metrics.Dimensions
-	Title      string
+	scene             *Scene
+    window            *sdlcanvas.Window
+    currentHz         int
+    currentFps        int
+    renderMux         sync.Mutex
+    tickMux           sync.Mutex
+}
 
-	OnTickRateUpdated func(int)
-	OnFPSUpdated      func(int)
+func NewEngine(title string, dimensions metrics.Dimensions) *Engine {
+    engine := Engine{
+        Title: title,
+        Dimensions: dimensions,
+        MaxTPS: 60,
+        renderMux: sync.Mutex{},
+        tickMux: sync.Mutex{},
+    }
 
-	currentHz  int
-	currentFps int
+    wnd, cv, err := sdlcanvas.CreateWindow(engine.Dimensions.Width, engine.Dimensions.Height, engine.Title)
+    if err != nil {
+		panic(err)
+    }
+    
+    engine.window = wnd
+    engine.Canvas = cv
 
-	window *sdlcanvas.Window
-	canvas *canvas.Canvas
+    return &engine
 }
 
 func (this *Engine) runPhysics() {
@@ -80,30 +101,48 @@ func (this *Engine) runGraphics() {
 }
 
 func (this *Engine) render() {
-	w, h := float64(this.canvas.Width()), float64(this.canvas.Height())
-	this.canvas.SetFillStyle("#000")
-	this.canvas.FillRect(0, 0, w, h)
-	this.canvas.SetFillStyle("#FFF")
-	this.canvas.FillText(fmt.Sprintf("FPS: %v, TPS: %v", this.currentFps, this.currentHz), 0, 32)
+    this.renderMux.Lock()
+    
+    w, h := float64(this.Canvas.Width()), float64(this.Canvas.Height())
+	this.Canvas.SetFillStyle("#000")
+    this.Canvas.FillRect(0, 0, w, h)
+
+    if this.scene.Render != nil {
+        this.scene.Render(this, this.scene)
+    }
+
+    if this.scene.Update != nil {
+        this.scene.Update(this, this.scene)
+    }
+
+    this.renderMux.Unlock()
 }
 
 func (this *Engine) tick() {
+    this.tickMux.Lock()
 
+    if this.scene.FixedUpdate != nil {
+        this.scene.FixedUpdate(this, this.scene)
+    }
+
+    this.tickMux.Unlock()
+}
+
+func (this *Engine) SetScene(scene *Scene) {
+    this.renderMux.Lock()
+    this.tickMux.Lock()
+
+    if this.scene != nil {
+        this.scene.ClearResources()
+    }
+    this.scene = scene
+    this.scene.LoadResources(this, this.scene)
+
+    this.tickMux.Unlock()
+    this.renderMux.Unlock()
 }
 
 func (this *Engine) Run() {
-	font := "/Users/nathan/Downloads/Anonymous/Anonymous.ttf"
-
-	wnd, cv, err := sdlcanvas.CreateWindow(this.Dimensions.Width, this.Dimensions.Height, this.Title)
-
-	if err != nil {
-		panic(err)
-	}
-	cv.SetFont(font, 40)
-
-	this.window = wnd
-	this.canvas = cv
-
-	go this.runPhysics()
+    go this.runPhysics()
 	this.runGraphics()
 }

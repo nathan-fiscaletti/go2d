@@ -6,78 +6,71 @@ package main
 // "github.com/tfriedel6/canvas/sdlcanvas"
 
 import (
+    "os"
+    "image"
+
 	"./go2d"
-	"./go2d/metrics"
+    "./go2d/metrics"
 )
 
 func main() {
-	engine := go2d.Engine{
-		MaxFPS: 60,
-		MaxTPS: 50,
-		Dimensions: metrics.NewAspectDimensions(
-			metrics.AspectRatio{
-				Ratio: metrics.Dimensions{
-					Width:  16,
-					Height: 9,
-				},
-				ControlAxis: metrics.AspectRatioControlAxisWidth,
-			},
-			1200,
-		),
-	}
+
+    // Create a new Engine
+    engine := go2d.NewEngine(
+        "My Engine", 
+
+        // Set the engine to 16x9 aspect ratio with 1200 width.
+        metrics.NewAspectRatio(
+            16, 9, metrics.AspectRatioControlAxisWidth,
+        ).NewDimensions(1200),
+    )
+
+    // Set the Tick Rate of the Engine to 5hz
+    engine.MaxTPS = 5
+
+    // Create the new Scene
+    scene := go2d.NewScene(engine, "Main Scene")
+
+    // Set the LoadResources callback for the Scene
+    scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
+        // Load the image from a file
+        imgf, err := os.Open("/Users/nathanf/Pictures/jennyandi.jpeg")
+        if err != nil {
+            panic(err)
+        }
+        i, _, err := image.Decode(imgf)
+        if err != nil {
+            panic(err)
+        }
+
+        // Create an ImageDrawable with the image.Image object
+        im := go2d.NewImageDrawable(engine.Canvas, i)
+
+        // Save the Resource in the Scene Resources
+        scene.SetResource("img", im)
+    }
+
+    // Set the Render Callback for the Scene
+    scene.Render = func(engine *go2d.Engine, scene *go2d.Scene) {
+        // Retrieve the Image from the Scene Resources
+        i := scene.GetResource("img").(*go2d.ImageDrawable)
+
+        // Render it to the SCene
+        i.Render()
+    }
+
+    // Set the Fixed Update callback for the scene
+    scene.FixedUpdate = func(engine *go2d.Engine, scene *go2d.Scene) {
+        // Retrieve the Image from the Scene Resources
+        im := scene.GetResource("img").(*go2d.ImageDrawable)
+
+        // Push it to the right by one pixel
+        im.Push(metrics.Vector{X:1, Y:0})
+    }
+    
+    // Set the Scene for the Engine
+    engine.SetScene(&scene)
+
+    // Run the Engine
 	engine.Run()
-
-	// lockToHz := 50
-	// v := metrics.NewRandomVector(metrics.Vector{
-	// 	X: 100,
-	// 	Y: 100,
-	// })
-
-	// print(fmt.Sprintf("%v, %v\n", v.X, v.Y))
-
-	// TODO: I should keep the physics update in a seprate thread and run it more
-	//       frequently, this would allow it to update physics as often as possible
-	//       but stick to the regular 60fps limit. Rendering would happen only once
-	//       every 60th of a second (ideally). Physics updates happen at 50hz.
-
-	//       I think physics should be based on time.
-
-	// wnd, cv, err := sdlcanvas.CreateWindow(1280, 720, "Hello")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer wnd.Destroy()
-
-	// lcnt := 0
-	// strt := time.Duration(time.Now().UnixNano())
-
-	// wnd.MainLoop(func() {
-	// 	w, h := float64(cv.Width()), float64(cv.Height())
-	// 	cv.SetFillStyle("#000")
-	// 	cv.FillRect(0, 0, w, h)
-
-	// 	for r := 0.0; r < math.Pi*2; r += math.Pi * 0.1 {
-	// 		cv.SetFillStyle(int(r*10), int(r*20), int(r*40))
-	// 		cv.BeginPath()
-	// 		cv.MoveTo(w*0.5, h*0.5)
-	// 		cv.Arc(w*0.5, h*0.5, math.Min(w, h)*0.4, r, r+0.1*math.Pi, false)
-	// 		cv.ClosePath()
-	// 		cv.Fill()
-	// 	}
-
-	// 	cv.SetStrokeStyle("#FFF")
-	// 	cv.SetLineWidth(10)
-	// 	cv.BeginPath()
-	// 	cv.Arc(w*0.5, h*0.5, math.Min(w, h)*0.4, 0, math.Pi*2, false)
-	// 	cv.Stroke()
-
-	// 	lcnt += 1
-
-	// 	now := time.Duration(time.Now().UnixNano())
-	// 	if now-strt >= time.Second {
-	// 		fmt.Printf("%v fps\n", lcnt)
-	// 		lcnt = 0
-	// 		strt = now
-	// 	}
-	// })
 }
