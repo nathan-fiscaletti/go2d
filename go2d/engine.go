@@ -13,7 +13,7 @@ import (
 
 type Engine struct {
     Title             string
-	MaxTPS            int
+	TickHz            int
     Dimensions        metrics.Dimensions
     OnTickRateUpdated func(int)
     OnFPSUpdated      func(int)
@@ -31,7 +31,7 @@ func NewEngine(title string, dimensions metrics.Dimensions) *Engine {
     engine := Engine{
         Title: title,
         Dimensions: dimensions,
-        MaxTPS: 60,
+        TickHz: 60,
         renderMux: sync.Mutex{},
         tickMux: sync.Mutex{},
     }
@@ -48,7 +48,7 @@ func NewEngine(title string, dimensions metrics.Dimensions) *Engine {
 }
 
 func (this *Engine) runPhysics() {
-	frequency := time.Second / time.Duration(this.MaxTPS)
+	frequency := time.Second / time.Duration(this.TickHz)
 
 	timeSliceOpened := time.Now()
 	ticksThisSecond := 0
@@ -126,6 +126,14 @@ func (this *Engine) tick() {
     }
 
     this.tickMux.Unlock()
+}
+
+func (this *Engine) GetFPS() int {
+    return this.currentFps
+}
+
+func (this *Engine) GetHz() int {
+    return this.currentHz
 }
 
 func (this *Engine) SetScene(scene *Scene) {

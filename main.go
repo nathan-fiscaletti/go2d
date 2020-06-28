@@ -26,7 +26,7 @@ func main() {
     )
 
     // Set the Tick Rate of the Engine to 5hz
-    engine.MaxTPS = 5
+    engine.TickHz = 5
 
     // Create the new Scene
     scene := go2d.NewScene(engine, "Main Scene")
