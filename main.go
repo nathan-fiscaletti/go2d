@@ -42,8 +42,8 @@ func main() {
             panic(err)
         }
 
-        // Create an ImageDrawable with the image.Image object
-        im := go2d.NewImageDrawable(engine.Canvas, i)
+        // Create an ImageEntity with the image.Image object
+        im := go2d.NewImageEntity(engine.Canvas, i)
 
         // Update the images velocity to move one pixel per tick.
         // TODO: Update velocity to be based on PixelsPerSecond
@@ -56,7 +56,7 @@ func main() {
     // Set the Render Callback for the Scene
     scene.Render = func(engine *go2d.Engine, scene *go2d.Scene) {
         // Retrieve the Image from the Scene Resources
-        i := scene.GetResource("img").(*go2d.ImageDrawable)
+        i := scene.GetResource("img").(*go2d.ImageEntity)
 
         // Render it to the SCene
         i.Render()
@@ -65,10 +65,10 @@ func main() {
     // Set the Fixed Update callback for the scene
     scene.FixedUpdate = func(engine *go2d.Engine, scene *go2d.Scene) {
         // Retrieve the Image from the Scene Resources
-        im := scene.GetResource("img").(*go2d.ImageDrawable)
+        im := scene.GetResource("img").(*go2d.ImageEntity)
 
         // Run the FixedUpdate for the Image
-        im.FixedUpdate()
+        im.FixedUpdate(engine, scene)
     }
     
     // Set the Scene for the Engine

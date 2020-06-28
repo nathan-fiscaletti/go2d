@@ -6,8 +6,8 @@ import(
     "github.com/tfriedel6/canvas"
 )
 
-type ImageDrawable struct {
-    Drawable
+type ImageEntity struct {
+    Entity
 
     gImg image.Image
 
@@ -15,16 +15,16 @@ type ImageDrawable struct {
     cImg *canvas.Image
 }
 
-func NewImageDrawable(c *canvas.Canvas, img image.Image) *ImageDrawable {
+func NewImageEntity(c *canvas.Canvas, img image.Image) *ImageEntity {
     i,err := c.LoadImage(img)
     if err != nil {
         panic(err)
     }
-    return &ImageDrawable {
+    return &ImageEntity {
         gImg: img,
         cImg: i,
         canvas: c,
-        Drawable: Drawable {
+        Entity: Entity {
             Visible: true,
             Bounds: Rect {
                 Dimensions: Dimensions {
@@ -36,11 +36,11 @@ func NewImageDrawable(c *canvas.Canvas, img image.Image) *ImageDrawable {
     }
 }
 
-func (this *ImageDrawable) GetImage() image.Image {
+func (this *ImageEntity) GetImage() image.Image {
     return this.gImg
 }
 
-func (this *ImageDrawable) Render() {
+func (this *ImageEntity) Render() {
     if this.Visible {
         this.canvas.DrawImage(
             this.cImg, 
