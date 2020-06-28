@@ -1,4 +1,4 @@
-package metrics
+package go2d
 
 import (
 	"math/rand"

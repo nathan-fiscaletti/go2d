@@ -1,4 +1,4 @@
-package metrics
+package go2d
 
 type Dimensions struct {
 	Width  int

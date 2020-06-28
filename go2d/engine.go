@@ -4,9 +4,6 @@ import (
     "time"
     "sync"
 
-    "./metrics"
-    //"./graphics"
-
 	"github.com/tfriedel6/canvas"
 	"github.com/tfriedel6/canvas/sdlcanvas"
 )
@@ -14,7 +11,7 @@ import (
 type Engine struct {
     Title             string
 	TickHz            int
-    Dimensions        metrics.Dimensions
+    Dimensions        Dimensions
     OnTickRateUpdated func(int)
     OnFPSUpdated      func(int)
     Canvas            *canvas.Canvas
@@ -27,7 +24,7 @@ type Engine struct {
     tickMux           sync.Mutex
 }
 
-func NewEngine(title string, dimensions metrics.Dimensions) *Engine {
+func NewEngine(title string, dimensions Dimensions) *Engine {
     engine := Engine{
         Title: title,
         Dimensions: dimensions,

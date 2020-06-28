@@ -10,7 +10,6 @@ import (
     "image"
 
 	"./go2d"
-    "./go2d/metrics"
 )
 
 func main() {
@@ -20,13 +19,13 @@ func main() {
         "My Engine", 
 
         // Set the engine to 16x9 aspect ratio with 1200 width.
-        metrics.NewAspectRatio(
-            16, 9, metrics.AspectRatioControlAxisWidth,
+        go2d.NewAspectRatio(
+            16, 9, go2d.AspectRatioControlAxisWidth,
         ).NewDimensions(1200),
     )
 
-    // Set the Tick Rate of the Engine to 5hz
-    engine.TickHz = 5
+    // Set the Tick Rate of the Engine to ~60hz
+    engine.TickHz = 60
 
     // Create the new Scene
     scene := go2d.NewScene(engine, "Main Scene")
@@ -46,6 +45,10 @@ func main() {
         // Create an ImageDrawable with the image.Image object
         im := go2d.NewImageDrawable(engine.Canvas, i)
 
+        // Update the images velocity to move one pixel per tick.
+        // TODO: Update velocity to be based on PixelsPerSecond
+        im.Velocity = &go2d.Vector{X: 1, Y: 0}
+
         // Save the Resource in the Scene Resources
         scene.SetResource("img", im)
     }
@@ -64,8 +67,8 @@ func main() {
         // Retrieve the Image from the Scene Resources
         im := scene.GetResource("img").(*go2d.ImageDrawable)
 
-        // Push it to the right by one pixel
-        im.Push(metrics.Vector{X:1, Y:0})
+        // Run the FixedUpdate for the Image
+        im.FixedUpdate()
     }
     
     // Set the Scene for the Engine

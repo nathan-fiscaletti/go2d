@@ -1,9 +1,7 @@
-package graphics
+package go2d
 
 import (
 	"image"
-
-	"../metrics"
 )
 
 type SpriteSheet struct {
@@ -12,7 +10,7 @@ type SpriteSheet struct {
 	Column int
 }
 
-func (this *SpriteSheet) getSprite(location metrics.Vector) image.Image {
+func (this *SpriteSheet) getSprite(location Vector) image.Image {
 	return this.Image.(interface {
 		SubImage(r image.Rectangle) image.Image
 	}).SubImage(
