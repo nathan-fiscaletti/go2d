@@ -17,21 +17,29 @@ type Spaceship struct {
 
 func (this *Spaceship) KeyDown(scancode int, rn rune, name string) {
     if name == "ArrowDown" {
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:this.Entity.Velocity.X, Y:1}
+        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:1}
     } else if name == "ArrowUp" {
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:this.Entity.Velocity.X, Y:-1}
+        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:-1}
     } else if name == "ArrowLeft" {
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:-1, Y:this.Entity.Velocity.Y}
+        this.Velocity = go2d.Vector{X:-1, Y:this.Velocity.Y}
     } else if name == "ArrowRight" {
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:1, Y:this.Entity.Velocity.Y}
+        this.Velocity = go2d.Vector{X:1, Y:this.Velocity.Y}
     }
 }
 
 func (this *Spaceship) KeyUp(scancode int, rn rune, name string) {
     if name == "ArrowDown" || name == "ArrowUp" {
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:this.Entity.Velocity.X, Y:0}
+        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:0}
     } else if name == "ArrowLeft" || name == "ArrowRight"{
-        this.ImageEntity.Entity.Velocity = go2d.Vector{X:0, Y:this.Entity.Velocity.Y}
+        this.Velocity = go2d.Vector{X:0, Y:this.Velocity.Y}
+    }
+}
+
+func (this *Spaceship) MouseDown(button int, pos go2d.Vector) {
+    if button == go2d.MOUSE_BUTTON_LEFT {
+        if this.Bounds.Contains(pos) {
+            fmt.Printf("clicked on spaceship")
+        }
     }
 }
 
@@ -55,11 +63,11 @@ func main() {
 
     // Set the LoadResources callback for the Scene
     scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
-        blue, err := go2d.LoadImageEntity("/Users/nathan/Pictures/blue.png")
+        blue, err := go2d.LoadImageEntity("./test_resources/blue.png")
         if err != nil {
             panic(err)
         }
-        red, err := go2d.LoadImageEntity("/Users/nathan/Pictures/red.png")
+        red, err := go2d.LoadImageEntity("./test_resources/red.png")
         if err != nil {
             panic(err)
         }
@@ -75,7 +83,7 @@ func main() {
         //scene.AddNamedEntity("blue", 1, blue)
         //scene.AddNamedEntity("red", 2, red)
 
-        go2d.SetDefaultFont("/Users/nathan/Downloads/Anonymous/Anonymous.ttf", 40, "#fff")
+        go2d.SetDefaultFont("./test_resources/font.ttf", 40, "#fff")
 
         fps := go2d.NewTextEntitySimple("FPS: 0")
         fps.Measure(engine)
@@ -85,7 +93,7 @@ func main() {
         tps.Bounds.X = fps.Bounds.X + fps.Bounds.Width + 20
         scene.AddNamedEntity("tps", 3, tps)
 
-        spriteSheet,err := go2d.NewSpriteSheet("/Users/nathan/Pictures/sprite_sheet.png", 32, 32)
+        spriteSheet,err := go2d.NewSpriteSheet("./test_resources/sprite_sheet.png", 32, 32)
         if err != nil {
             panic(err)
         }
@@ -101,6 +109,14 @@ func main() {
             ImageEntity: spaceShip,
         }
         scene.AddNamedEntity("ss", 4, &spaceShipFinal)
+
+        //circle := go2d.NewCircleImageEntity("#00FF00", 32)
+        circle := go2d.NewRectImageEntity("#00FF00", go2d.Dimensions{Width: 32, Height:96})
+        circle.MoveTo(go2d.Vector{
+            X:32, Y: 32,
+        })
+
+        scene.AddNamedEntity("circle", 5, circle)
     }
 
     // Set the Scene for the Engine

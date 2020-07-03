@@ -7,6 +7,7 @@ import (
 
     "github.com/tfriedel6/canvas"
     "github.com/tfriedel6/canvas/sdlcanvas"
+    "github.com/veandco/go-sdl2/sdl"
 )
 
 type Engine struct {
@@ -16,6 +17,7 @@ type Engine struct {
     OnTickRateUpdated func(*Engine, int)
     OnFPSUpdated      func(*Engine, int)
     Canvas            *canvas.Canvas
+    HideCursor        bool
 
     scene             *Scene
     window            *sdlcanvas.Window
@@ -39,6 +41,8 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
         panic(err)
     }
 
+    wnd.Window.SetResizable(false)
+
     engine.window = wnd
     engine.Canvas = cv
 
@@ -48,6 +52,25 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
 
     engine.window.KeyUp = func(scancode int, rn rune, name string) {
         engine.scene.notifyKeyUp(scancode, rn, name)
+    }
+
+    engine.window.MouseUp = func(b, x, y int) {
+        engine.scene.notifyMouseUp(b, Vector{X:x, Y:y})
+    }
+
+    engine.window.MouseDown = func(b, x, y int) {
+        engine.scene.notifyMouseDown(b, Vector{X:x, Y:y})
+    }
+
+    engine.window.MouseMove = func(x, y int) {
+        engine.scene.notifyMouseMove(Vector{X:x, Y:y})
+    }
+
+    engine.window.SizeChange = func(w, h int) {
+        engine.Dimensions = Dimensions{
+            Width: w,
+            Height: h,
+        }
     }
 
     return &engine
@@ -160,6 +183,9 @@ func (this *Engine) GetScene() *Scene {
 }
 
 func (this *Engine) Run() {
+    if this.HideCursor == true {
+        sdl.ShowCursor(0)
+    }
     go this.runPhysics()
     this.runGraphics()
 }

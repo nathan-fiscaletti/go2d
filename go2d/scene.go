@@ -19,6 +19,7 @@ type Scene struct {
     engine        *Engine
     resources     map[string]interface{}
     entities      map[int]map[string]interface{}
+    timers        map[string]*Timer
 }
 
 type ByLayer []int
@@ -30,10 +31,19 @@ func (a ByLayer) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func NewScene(engine *Engine, name string) Scene {
     return Scene {
         engine: engine,
+        timers: map[string]*Timer{},
         resources: map[string]interface{}{},
         entities: map[int]map[string]interface{}{},
         Name: name,
     }
+}
+
+func (this *Scene) AddTimer(name string, t *Timer) {
+    this.timers[name] = t
+}
+
+func (this *Scene) RemoveTimer(name string) {
+    delete(this.timers, name)
 }
 
 func (this *Scene) GetResource(name string) interface{} {
@@ -61,11 +71,6 @@ func (this *Scene) GetEntity(layer int, name string) interface{} {
 }
 
 func (this *Scene) AddNamedEntity(name string, layer int, ent interface{}) {
-    // _, err := entityForInterface(ent)
-    // if err != nil {
-    //     panic(err)
-    // }
-
     if _,layerExists := this.entities[layer]; !layerExists {
         this.entities[layer] = map[string]interface{}{}
     }
@@ -73,11 +78,6 @@ func (this *Scene) AddNamedEntity(name string, layer int, ent interface{}) {
 }
 
 func (this *Scene) AddEntity(layer int, ent interface{}) string {
-    // _, err := entityForInterface(ent)
-    // if err != nil {
-    //     panic(err)
-    // }
-
     n := time.Now().UnixNano()
     r := rand.New(rand.NewSource(n))
     id := fmt.Sprintf("entity_%v.%v", n, r.Intn(10000))
@@ -98,87 +98,92 @@ func (this *Scene) ClearEntities() {
     }
 }
 
-func (this *Scene) notifyKeyUp(scancode int, rn rune, name string) {
-    i := 0
-    layers := make([]int, len(this.entities))
-    for k := range this.entities {
-        layers[i] = k
-        i++
-    }
-    sort.Sort(ByLayer(layers))
-
-    for i := 0; i < len(layers); i++ {
-        layer := layers[i]
-        for _, e := range this.entities[layer] {
-            _,isControllable := e.(Controllable)
-            if isControllable {
-                e.(Controllable).KeyUp(scancode, rn, name)
-            }
+func (this *Scene) notifyMouseMove(pos Vector) {
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isMouseSensitive := e.(IMouseMove)
+        if isMouseSensitive {
+            e.(IMouseMove).MouseMove(pos)
         }
-    }
+    })
+}
+
+func (this *Scene) notifyMouseUp(button int, pos Vector) {
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isMouseSensitive := e.(IMouseUp)
+        if isMouseSensitive {
+            e.(IMouseUp).MouseUp(button, pos)
+        }
+    })
+}
+
+func (this *Scene) notifyMouseDown(button int, pos Vector) {
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isMouseSensitive := e.(IMouseDown)
+        if isMouseSensitive {
+            e.(IMouseDown).MouseDown(button, pos)
+        }
+    })
+}
+
+func (this *Scene) notifyKeyUp(scancode int, rn rune, name string) {
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isKeySensitive := e.(IKeyUp)
+        if isKeySensitive {
+            e.(IKeyUp).KeyUp(scancode, rn, name)
+        }
+    })
 }
 
 func (this *Scene) notifyKeyDown(scancode int, rn rune, name string) {
-    i := 0
-    layers := make([]int, len(this.entities))
-    for k := range this.entities {
-        layers[i] = k
-        i++
-    }
-    sort.Sort(ByLayer(layers))
-
-    for i := 0; i < len(layers); i++ {
-        layer := layers[i]
-        for _, e := range this.entities[layer] {
-            _,isControllable := e.(Controllable)
-            if isControllable {
-                e.(Controllable).KeyDown(scancode, rn, name)
-            }
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isKeySensitive := e.(IKeyDown)
+        if isKeySensitive {
+            e.(IKeyDown).KeyDown(scancode, rn, name)
         }
-    }
+    })
+}
+
+func (this *Scene) notifyKeyChar(rn rune) {
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isKeySensitive := e.(IKeyChar)
+        if isKeySensitive {
+            e.(IKeyChar).KeyChar(rn)
+        }
+    })
 }
 
 func (this *Scene) performUpdate(engine *Engine) {
-    i := 0
-    layers := make([]int, len(this.entities))
-    for k := range this.entities {
-        layers[i] = k
-        i++
+    for _,t := range this.timers {
+        t.notifyUpdate(this, this)
     }
-    sort.Sort(ByLayer(layers))
 
-    for i := 0; i < len(layers); i++ {
-        layer := layers[i]
-        for _, e := range this.entities[layer] {
-            _,isUpdatable := e.(Updatable)
-            if isUpdatable {
-                e.(Updatable).Update(engine)
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isConstrained := e.(IConstrained)
+        if isConstrained {
+            constrainedSides := e.(IConstrained).Constrain(engine)
+            for _, side := range constrainedSides {
+                e.(IConstrained).Constrained(side)
             }
         }
-    }
+
+        _,isUpdatable := e.(IUpdate)
+        if isUpdatable {
+            e.(IUpdate).Update(engine)
+        }
+    })
+    
     if this.Update != nil {
         this.Update(engine, this)
     }
 }
 
 func (this *Scene) performFixedUpdate(engine *Engine) {
-    i := 0
-    layers := make([]int, len(this.entities))
-    for k := range this.entities {
-        layers[i] = k
-        i++
-    }
-    sort.Sort(ByLayer(layers))
-
-    for i := 0; i < len(layers); i++ {
-        layer := layers[i]
-        for _, e := range this.entities[layer] {
-            _,isFixedUpdatable := e.(FixedUpdatable)
-            if isFixedUpdatable {
-                e.(FixedUpdatable).FixedUpdate(engine)
-            }
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isFixedUpdatable := e.(IFixedUpdate)
+        if isFixedUpdatable {
+            e.(IFixedUpdate).FixedUpdate(engine)
         }
-    }
+    })
     if this.FixedUpdate != nil {
         this.FixedUpdate(engine, this)
     }
@@ -189,6 +194,19 @@ func (this *Scene) performRender(engine *Engine) {
         this.PreRender(engine, this)
     }
 
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isRenderable := e.(IRender)
+        if isRenderable {
+            e.(IRender).Render(this.engine)
+        }
+    })
+
+    if this.Render != nil {
+        this.Render(engine, this)
+    }
+}
+
+func (this *Scene) iterateEntities(cb func(*Scene, interface{})) {
     i := 0
     layers := make([]int, len(this.entities))
     for k := range this.entities {
@@ -200,13 +218,7 @@ func (this *Scene) performRender(engine *Engine) {
     for i := 0; i < len(layers); i++ {
         layer := layers[i]
         for _, e := range this.entities[layer] {
-            _,isRenderable := e.(Renderable)
-            if isRenderable {
-                e.(Renderable).Render(this.engine)
-            }
+            cb(this, e)
         }
-    }
-    if this.Render != nil {
-        this.Render(engine, this)
     }
 }

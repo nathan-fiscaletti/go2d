@@ -97,3 +97,7 @@ func (this *TextEntity) Render(e *Engine) {
     e.Canvas.SetFillStyle(this.textColor)
     e.Canvas.FillText(this.text, float64(this.Bounds.X), float64(this.Bounds.Y + this.Bounds.Height))
 }
+
+func (this *TextEntity) FixedUpdate(e *Engine) {
+    this.Entity.FixedUpdate()
+}

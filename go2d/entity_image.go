@@ -3,9 +3,15 @@ package go2d
 import (
     "image"
     "os"
+    "math"
 
     "github.com/tfriedel6/canvas"
+    "github.com/tfriedel6/canvas/backend/softwarebackend"
 )
+
+type ITexture interface {
+    GetTexture() image.Image
+}
 
 type ImageEntity struct {
     Entity
@@ -40,6 +46,33 @@ func LoadImageEntity(path string) (*ImageEntity, error) {
     }
 
     return NewImageEntity(i), nil
+}
+
+func NewRectImageEntity(color string, dimensions Dimensions) *ImageEntity {
+    backend := softwarebackend.New(dimensions.Width, dimensions.Height)
+    cv := canvas.New(backend)
+
+    cv.SetFillStyle(color)
+    cv.Rect(0, 0, float64(dimensions.Width), float64(dimensions.Height))
+    cv.Fill()
+    
+    img := cv.GetImageData(0, 0, dimensions.Width, dimensions.Height)
+
+    return NewImageEntity(img)
+}
+
+func NewCircleImageEntity(color string, radius int) *ImageEntity {
+    backend := softwarebackend.New(radius*2, radius*2)
+    cv := canvas.New(backend)
+
+    cv.SetFillStyle(color)
+    cv.BeginPath()
+    cv.Arc(float64(radius/2), float64(radius/2), float64(radius/2), 0, math.Pi*2, false)
+    cv.Fill()
+    
+    img := cv.GetImageData(0, 0, radius, radius)
+
+    return NewImageEntity(img)
 }
 
 func (this *ImageEntity) GetImage() image.Image {
