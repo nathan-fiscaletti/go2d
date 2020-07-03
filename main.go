@@ -12,8 +12,7 @@ import (
 )
 
 type Spaceship struct {
-    go2d.Entity
-    *go2d.ImageEntity //how
+    *go2d.ImageEntity
 }
 
 func (this *Spaceship) KeyDown(scancode int, rn rune, name string) {

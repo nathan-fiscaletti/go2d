@@ -61,10 +61,10 @@ func (this *Scene) GetEntity(layer int, name string) interface{} {
 }
 
 func (this *Scene) AddNamedEntity(name string, layer int, ent interface{}) {
-    _, err := entityForInterface(ent)
-    if err != nil {
-        panic(err)
-    }
+    // _, err := entityForInterface(ent)
+    // if err != nil {
+    //     panic(err)
+    // }
 
     if _,layerExists := this.entities[layer]; !layerExists {
         this.entities[layer] = map[string]interface{}{}
@@ -73,10 +73,10 @@ func (this *Scene) AddNamedEntity(name string, layer int, ent interface{}) {
 }
 
 func (this *Scene) AddEntity(layer int, ent interface{}) string {
-    _, err := entityForInterface(ent)
-    if err != nil {
-        panic(err)
-    }
+    // _, err := entityForInterface(ent)
+    // if err != nil {
+    //     panic(err)
+    // }
 
     n := time.Now().UnixNano()
     r := rand.New(rand.NewSource(n))
