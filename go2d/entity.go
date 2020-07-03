@@ -6,15 +6,15 @@ import (
 )
 
 type Renderable interface {
-    Render()
+    Render(c *Engine)
 }
 
 type FixedUpdatable interface {
-    FixedUpdate()
+    FixedUpdate(e *Engine)
 }
 
 type Updatable interface {
-    Update()
+    Update(e *Engine)
 }
 
 type Entity struct {
@@ -65,7 +65,9 @@ func (this *Entity) FixedUpdate() {
     if this.Velocity != nil {
         this.Push(*this.Velocity)
     }
-    this.constrain(this.Constraint)
+    if ! this.Constraint.Equals(NewZeroRect(0, 0)) {
+        this.constrain(this.Constraint)
+    }
 }
 
 func (this *Entity) constrain(r Rect) {

@@ -29,19 +29,22 @@ func main() {
 
     // Set the LoadResources callback for the Scene
     scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
-        blue, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathan/Pictures/blue.png")
+        blue, err := go2d.LoadImageEntity("/Users/nathan/Pictures/blue.png")
         if err != nil {
             panic(err)
         }
-        red, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathan/Pictures/red2.png")
+        red, err := go2d.LoadImageEntity("/Users/nathan/Pictures/red.png")
         if err != nil {
             panic(err)
         }
 
         // Update the images velocity to move one pixel per tick.
         // TODO: Update velocity to be based on PixelsPerSecond
-        blue.Velocity = &go2d.Vector{X: 1, Y: 0}
-        red.Velocity = &go2d.Vector{X: 0, Y: 1}
+        blue.Velocity = &go2d.Vector{X: 10, Y: 0}
+        red.Velocity = &go2d.Vector{X: 0, Y: 10}
+        
+        blue.Entity.Constraint = engine.Bounds()
+        red.Entity.Constraint = engine.Bounds()
 
         // Save the Resource in the Scene Resources
         //scene.SetResource("img", im)

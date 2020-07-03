@@ -31,6 +31,11 @@ func NewRect(x int, y int, w int, h int) Rect {
     }
 }
 
+func (this *Rect) Equals(other Rect) bool {
+    return this.X == other.X && this.Y == other.Y && 
+           this.Width == other.Width && this.Height == other.Height
+}
+
 func (this *Rect) IntersectsWith(other Rect) bool {
     return this.X < other.X + other.Width &&
            this.X + this.Width > other.X &&

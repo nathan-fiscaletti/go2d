@@ -112,7 +112,7 @@ func (this *Scene) performUpdate(engine *Engine) {
         for _, e := range this.entities[layer] {
             _,isUpdatable := e.(Updatable)
             if isUpdatable {
-                e.(Updatable).Update()
+                e.(Updatable).Update(engine)
             }
         }
     }
@@ -135,7 +135,7 @@ func (this *Scene) performFixedUpdate(engine *Engine) {
         for _, e := range this.entities[layer] {
             _,isFixedUpdatable := e.(FixedUpdatable)
             if isFixedUpdatable {
-                e.(FixedUpdatable).FixedUpdate()
+                e.(FixedUpdatable).FixedUpdate(engine)
             }
         }
     }
@@ -162,7 +162,7 @@ func (this *Scene) performRender(engine *Engine) {
         for _, e := range this.entities[layer] {
             _,isRenderable := e.(Renderable)
             if isRenderable {
-                e.(Renderable).Render()
+                e.(Renderable).Render(this.engine)
             }
         }
     }

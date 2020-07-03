@@ -44,6 +44,15 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
     return &engine
 }
 
+func (this *Engine) Bounds() Rect {
+    return Rect {
+        Vector: Vector {
+            X:0, Y:0,
+        },
+        Dimensions: this.Dimensions,
+    }
+}
+
 func (this *Engine) runPhysics() {
     frequency := time.Second / time.Duration(this.TickHz)
 

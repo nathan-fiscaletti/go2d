@@ -11,19 +11,12 @@ type ImageEntity struct {
     Entity
 
     gImg   image.Image
-    canvas *canvas.Canvas
     cImg   *canvas.Image
 }
 
-func NewImageEntity(c *canvas.Canvas, img image.Image) *ImageEntity {
-    i, err := c.LoadImage(img)
-    if err != nil {
-        panic(err)
-    }
+func NewImageEntity(img image.Image) *ImageEntity {
     return &ImageEntity{
         gImg:   img,
-        cImg:   i,
-        canvas: c,
         Entity: Entity{
             Visible: true,
             Bounds: Rect{
@@ -36,7 +29,7 @@ func NewImageEntity(c *canvas.Canvas, img image.Image) *ImageEntity {
     }
 }
 
-func LoadImageEntity(c *canvas.Canvas, path string) (*ImageEntity, error) {
+func LoadImageEntity(path string) (*ImageEntity, error) {
     imgf, err := os.Open(path)
     if err != nil {
         return nil, err
@@ -46,25 +39,33 @@ func LoadImageEntity(c *canvas.Canvas, path string) (*ImageEntity, error) {
         return nil, err
     }
 
-    return NewImageEntity(c, i), nil
+    return NewImageEntity(i), nil
 }
 
 func (this *ImageEntity) GetImage() image.Image {
     return this.gImg
 }
 
-func (this *ImageEntity) Render() {
+func (this *ImageEntity) Render(e *Engine) {
+    if this.cImg == nil {
+        i, err := e.Canvas.LoadImage(this.gImg)
+        if err != nil {
+            panic(err)
+        }
+        this.cImg = i
+    }
+
     if this.Visible {
-        this.canvas.DrawImage(
+        e.Canvas.DrawImage(
             this.cImg,
-            float64(this.Bounds.X),
-            float64(this.Bounds.Y),
-            float64(this.Bounds.Width),
-            float64(this.Bounds.Height),
+            float64(this.Bounds.X * 2),
+            float64(this.Bounds.Y * 2),
+            float64(this.Bounds.Width * 2),
+            float64(this.Bounds.Height * 2),
         )
     }
 }
 
-func (this *ImageEntity) FixedUpdate() {
+func (this *ImageEntity) FixedUpdate(e *Engine) {
     this.Entity.FixedUpdate()
 }
