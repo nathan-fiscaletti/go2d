@@ -3,15 +3,15 @@ package go2d
 
 type RectSide int
 const (
-	LeftSide = iota
+    LeftSide = iota
     RightSide
     TopSide
     BottomSide
 )
 
 type Rect struct {
-	Vector
-	Dimensions
+    Vector
+    Dimensions
 }
 
 func NewZeroRect(w int, h int) Rect {
@@ -39,10 +39,10 @@ func (this *Rect) IntersectsWith(other Rect) bool {
 }
 
 func (this *Rect) Contains(v Vector) bool {
-	return !(v.X < this.X ||
-		v.Y < this.Y ||
-		v.X > this.X+this.Width ||
-		v.Y > this.Y+this.Height)
+    return !(v.X < this.X ||
+        v.Y < this.Y ||
+        v.X > this.X+this.Width ||
+        v.Y > this.Y+this.Height)
 }
 
 func (this *Rect) Constrain(r Rect) []RectSide {

@@ -4,19 +4,19 @@ import (
     "time"
     "sync"
 
-	"github.com/tfriedel6/canvas"
-	"github.com/tfriedel6/canvas/sdlcanvas"
+    "github.com/tfriedel6/canvas"
+    "github.com/tfriedel6/canvas/sdlcanvas"
 )
 
 type Engine struct {
     Title             string
-	TickHz            int
+    TickHz            int
     Dimensions        Dimensions
     OnTickRateUpdated func(int)
     OnFPSUpdated      func(int)
     Canvas            *canvas.Canvas
 
-	scene             *Scene
+    scene             *Scene
     window            *sdlcanvas.Window
     currentHz         int
     currentFps        int
@@ -35,7 +35,7 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
 
     wnd, cv, err := sdlcanvas.CreateWindow(engine.Dimensions.Width, engine.Dimensions.Height, engine.Title)
     if err != nil {
-		panic(err)
+        panic(err)
     }
     
     engine.window = wnd
@@ -45,63 +45,63 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
 }
 
 func (this *Engine) runPhysics() {
-	frequency := time.Second / time.Duration(this.TickHz)
+    frequency := time.Second / time.Duration(this.TickHz)
 
-	timeSliceOpened := time.Now()
-	ticksThisSecond := 0
-	for true {
-		tick := time.Now()
+    timeSliceOpened := time.Now()
+    ticksThisSecond := 0
+    for true {
+        tick := time.Now()
 
-		this.tick()
+        this.tick()
 
-		ticksThisSecond += 1
-		if time.Since(timeSliceOpened) >= time.Second {
-			this.currentHz = ticksThisSecond
-			timeSliceOpened = time.Now()
-			ticksThisSecond = 0
+        ticksThisSecond += 1
+        if time.Since(timeSliceOpened) >= time.Second {
+            this.currentHz = ticksThisSecond
+            timeSliceOpened = time.Now()
+            ticksThisSecond = 0
 
-			if this.OnTickRateUpdated != nil {
-				this.OnTickRateUpdated(this.currentHz)
-			}
-		}
+            if this.OnTickRateUpdated != nil {
+                this.OnTickRateUpdated(this.currentHz)
+            }
+        }
 
-		tock := time.Since(tick)
-		if frequency-tock > 0 {
-			// we just accept that this won't always be accurate
-			// due to the resolution of the system clock. But that
-			// just means the desired hz may not be perfect.
-			time.Sleep(frequency - tock)
-		}
-	}
+        tock := time.Since(tick)
+        if frequency-tock > 0 {
+            // we just accept that this won't always be accurate
+            // due to the resolution of the system clock. But that
+            // just means the desired hz may not be perfect.
+            time.Sleep(frequency - tock)
+        }
+    }
 }
 
 func (this *Engine) runGraphics() {
-	defer this.window.Destroy()
+    defer this.window.Destroy()
 
-	timeSliceOpened := time.Now()
-	framesThisSecond := 0
+    timeSliceOpened := time.Now()
+    framesThisSecond := 0
 
-	this.window.MainLoop(func() {
-		this.render()
-		framesThisSecond += 1
+    this.window.MainLoop(func() {
+        this.render()
+        framesThisSecond += 1
 
-		if time.Since(timeSliceOpened) >= time.Second {
-			this.currentFps = framesThisSecond
-			timeSliceOpened = time.Now()
-			framesThisSecond = 0
+        if time.Since(timeSliceOpened) >= time.Second {
+            this.currentFps = framesThisSecond
+            timeSliceOpened = time.Now()
+            framesThisSecond = 0
 
-			if this.OnFPSUpdated != nil {
-				this.OnFPSUpdated(this.currentFps)
-			}
-		}
-	})
+            if this.OnFPSUpdated != nil {
+                this.OnFPSUpdated(this.currentFps)
+            }
+        }
+    })
 }
 
 func (this *Engine) render() {
     this.renderMux.Lock()
     
     w, h := float64(this.Canvas.Width()), float64(this.Canvas.Height())
-	this.Canvas.SetFillStyle("#000")
+    this.Canvas.SetFillStyle("#000")
     this.Canvas.FillRect(0, 0, w, h)
     this.scene.performUpdate(this)
     this.scene.performRender(this)
@@ -138,5 +138,5 @@ func (this *Engine) SetScene(scene *Scene) {
 
 func (this *Engine) Run() {
     go this.runPhysics()
-	this.runGraphics()
+    this.runGraphics()
 }

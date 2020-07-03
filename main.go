@@ -13,7 +13,7 @@ func main() {
 
     // Create a new Engine
     engine := go2d.NewEngine(
-        "My Engine", 
+        "My Engine",
 
         // Set the engine to 16x9 aspect ratio with 1200 width.
         go2d.NewAspectRatio(
@@ -29,29 +29,29 @@ func main() {
 
     // Set the LoadResources callback for the Scene
     scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
-        us, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathanf/Pictures/jennyandi.jpeg")
+        blue, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathan/Pictures/blue.png")
         if err != nil {
             panic(err)
         }
-        lg,err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathanf/Pictures/vrazo_logo.png")
+        red, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathan/Pictures/red2.png")
         if err != nil {
             panic(err)
         }
 
         // Update the images velocity to move one pixel per tick.
         // TODO: Update velocity to be based on PixelsPerSecond
-        us.Velocity = &go2d.Vector{X: 1, Y: 0}
-        lg.Velocity = &go2d.Vector{X: 0, Y: 1}
+        blue.Velocity = &go2d.Vector{X: 1, Y: 0}
+        red.Velocity = &go2d.Vector{X: 0, Y: 1}
 
         // Save the Resource in the Scene Resources
         //scene.SetResource("img", im)
-        scene.AddNamedEntity("img", 1, us)
-        scene.AddNamedEntity("img2", 2, lg)
+        scene.AddNamedEntity("blue", 1, blue)
+        scene.AddNamedEntity("red", 2, red)
     }
-    
+
     // Set the Scene for the Engine
     engine.SetScene(&scene)
 
     // Run the Engine
-	engine.Run()
+    engine.Run()
 }

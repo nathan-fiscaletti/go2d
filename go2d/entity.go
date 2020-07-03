@@ -1,8 +1,8 @@
 package go2d
 
-import(
-    "reflect" // :(
+import (
     "errors"
+    "reflect" // :(
 )
 
 type Renderable interface {
@@ -22,13 +22,13 @@ type Entity struct {
     Bounds     Rect
     Constraint Rect
     Velocity   *Vector
-    layer int
+    layer      int
 
-    OnConstrained func(s RectSide)
+    OnConstrained func(e *Entity, s RectSide)
 }
 
 func entityForInterface(iface interface{}) (Entity, error) {
-    if _,isEntity := iface.(Entity); isEntity {
+    if _, isEntity := iface.(Entity); isEntity {
         return iface.(Entity), nil
     }
 
@@ -69,10 +69,10 @@ func (this *Entity) FixedUpdate() {
 }
 
 func (this *Entity) constrain(r Rect) {
-    out := this.Bounds.Constrain(r)
+    constrainedSides := this.Bounds.Constrain(r)
     if this.OnConstrained != nil {
-        for _,side := range out {
-            this.OnConstrained(side)
+        for _, side := range constrainedSides {
+            this.OnConstrained(this, side)
         }
     }
 }
