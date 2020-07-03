@@ -103,25 +103,14 @@ func (this *Engine) render() {
     w, h := float64(this.Canvas.Width()), float64(this.Canvas.Height())
 	this.Canvas.SetFillStyle("#000")
     this.Canvas.FillRect(0, 0, w, h)
-
-    if this.scene.Update != nil {
-        this.scene.Update(this, this.scene)
-    }
-
-    if this.scene.Render != nil {
-        this.scene.Render(this, this.scene)
-    }
-
+    this.scene.performUpdate(this)
+    this.scene.performRender(this)
     this.renderMux.Unlock()
 }
 
 func (this *Engine) tick() {
     this.tickMux.Lock()
-
-    if this.scene.FixedUpdate != nil {
-        this.scene.FixedUpdate(this, this.scene)
-    }
-
+    this.scene.performFixedUpdate(this)
     this.tickMux.Unlock()
 }
 

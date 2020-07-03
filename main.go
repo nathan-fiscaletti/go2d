@@ -6,10 +6,7 @@ package main
 // "github.com/tfriedel6/canvas/sdlcanvas"
 
 import (
-    "os"
-    "image"
-
-	"./go2d"
+    "./go2d"
 )
 
 func main() {
@@ -32,43 +29,24 @@ func main() {
 
     // Set the LoadResources callback for the Scene
     scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
-        // Load the image from a file
-        imgf, err := os.Open("/Users/nathanf/Pictures/jennyandi.jpeg")
+        us, err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathanf/Pictures/jennyandi.jpeg")
         if err != nil {
             panic(err)
         }
-        i, _, err := image.Decode(imgf)
+        lg,err := go2d.LoadImageEntity(engine.Canvas, "/Users/nathanf/Pictures/vrazo_logo.png")
         if err != nil {
             panic(err)
         }
-
-        // Create an ImageEntity with the image.Image object
-        im := go2d.NewImageEntity(engine.Canvas, i)
 
         // Update the images velocity to move one pixel per tick.
         // TODO: Update velocity to be based on PixelsPerSecond
-        im.Velocity = &go2d.Vector{X: 1, Y: 0}
+        us.Velocity = &go2d.Vector{X: 1, Y: 0}
+        lg.Velocity = &go2d.Vector{X: 0, Y: 1}
 
         // Save the Resource in the Scene Resources
-        scene.SetResource("img", im)
-    }
-
-    // Set the Render Callback for the Scene
-    scene.Render = func(engine *go2d.Engine, scene *go2d.Scene) {
-        // Retrieve the Image from the Scene Resources
-        i := scene.GetResource("img").(*go2d.ImageEntity)
-
-        // Render it to the SCene
-        i.Render()
-    }
-
-    // Set the Fixed Update callback for the scene
-    scene.FixedUpdate = func(engine *go2d.Engine, scene *go2d.Scene) {
-        // Retrieve the Image from the Scene Resources
-        im := scene.GetResource("img").(*go2d.ImageEntity)
-
-        // Run the FixedUpdate for the Image
-        im.FixedUpdate(engine, scene)
+        //scene.SetResource("img", im)
+        scene.AddNamedEntity("img", 1, us)
+        scene.AddNamedEntity("img2", 2, lg)
     }
     
     // Set the Scene for the Engine
