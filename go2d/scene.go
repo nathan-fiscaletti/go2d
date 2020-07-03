@@ -98,6 +98,46 @@ func (this *Scene) ClearEntities() {
     }
 }
 
+func (this *Scene) notifyKeyUp(scancode int, rn rune, name string) {
+    i := 0
+    layers := make([]int, len(this.entities))
+    for k := range this.entities {
+        layers[i] = k
+        i++
+    }
+    sort.Sort(ByLayer(layers))
+
+    for i := 0; i < len(layers); i++ {
+        layer := layers[i]
+        for _, e := range this.entities[layer] {
+            _,isControllable := e.(Controllable)
+            if isControllable {
+                e.(Controllable).KeyUp(scancode, rn, name)
+            }
+        }
+    }
+}
+
+func (this *Scene) notifyKeyDown(scancode int, rn rune, name string) {
+    i := 0
+    layers := make([]int, len(this.entities))
+    for k := range this.entities {
+        layers[i] = k
+        i++
+    }
+    sort.Sort(ByLayer(layers))
+
+    for i := 0; i < len(layers); i++ {
+        layer := layers[i]
+        for _, e := range this.entities[layer] {
+            _,isControllable := e.(Controllable)
+            if isControllable {
+                e.(Controllable).KeyDown(scancode, rn, name)
+            }
+        }
+    }
+}
+
 func (this *Scene) performUpdate(engine *Engine) {
     i := 0
     layers := make([]int, len(this.entities))

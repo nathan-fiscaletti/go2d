@@ -58,10 +58,10 @@ func (this *ImageEntity) Render(e *Engine) {
     if this.Visible {
         e.Canvas.DrawImage(
             this.cImg,
-            float64(this.Bounds.X * 2),
-            float64(this.Bounds.Y * 2),
-            float64(this.Bounds.Width * 2),
-            float64(this.Bounds.Height * 2),
+            float64(this.Bounds.X),
+            float64(this.Bounds.Y),
+            float64(this.Bounds.Width),
+            float64(this.Bounds.Height),
         )
     }
 }

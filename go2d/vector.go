@@ -100,13 +100,6 @@ func (this *Vector) Times(v Vector) Vector {
     }
 }
 
-func (this *Vector) DividedBy(v Vector) Vector {
-    return Vector{
-        X: this.X / v.X,
-        Y: this.Y / v.Y,
-    }
-}
-
 func (this *Vector) IsInsideOf(r Rect) bool {
     return r.Contains(*this)
 }
@@ -129,6 +122,10 @@ func (this *Vector) IsBelow(v Vector) bool {
 
 func (this *Vector) IsZero() bool {
     return this.Y == 0 && this.X == 0
+}
+
+func (this *Vector) Equals(other Vector) bool {
+    return this.X == other.X && this.Y == other.Y
 }
 
 func (this *Vector) Negative() Vector {

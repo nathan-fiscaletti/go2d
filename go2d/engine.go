@@ -1,6 +1,7 @@
 package go2d
 
 import (
+    "fmt"
     "time"
     "sync"
 
@@ -12,8 +13,8 @@ type Engine struct {
     Title             string
     TickHz            int
     Dimensions        Dimensions
-    OnTickRateUpdated func(int)
-    OnFPSUpdated      func(int)
+    OnTickRateUpdated func(*Engine, int)
+    OnFPSUpdated      func(*Engine, int)
     Canvas            *canvas.Canvas
 
     scene             *Scene
@@ -37,9 +38,17 @@ func NewEngine(title string, dimensions Dimensions) *Engine {
     if err != nil {
         panic(err)
     }
-    
+
     engine.window = wnd
     engine.Canvas = cv
+
+    engine.window.KeyDown = func(scancode int, rn rune, name string) {
+        engine.scene.notifyKeyDown(scancode, rn, name)
+    }
+
+    engine.window.KeyUp = func(scancode int, rn rune, name string) {
+        engine.scene.notifyKeyUp(scancode, rn, name)
+    }
 
     return &engine
 }
@@ -70,7 +79,7 @@ func (this *Engine) runPhysics() {
             ticksThisSecond = 0
 
             if this.OnTickRateUpdated != nil {
-                this.OnTickRateUpdated(this.currentHz)
+                this.OnTickRateUpdated(this, this.currentHz)
             }
         }
 
@@ -100,7 +109,7 @@ func (this *Engine) runGraphics() {
             framesThisSecond = 0
 
             if this.OnFPSUpdated != nil {
-                this.OnFPSUpdated(this.currentFps)
+                this.OnFPSUpdated(this, this.currentFps)
             }
         }
     })
@@ -140,9 +149,14 @@ func (this *Engine) SetScene(scene *Scene) {
     }
     this.scene = scene
     this.scene.LoadResources(this, this.scene)
+    this.window.Window.SetTitle(fmt.Sprintf("%s - %s", this.Title, this.scene.Name))
 
     this.tickMux.Unlock()
     this.renderMux.Unlock()
+}
+
+func (this *Engine) GetScene() *Scene {
+    return this.scene
 }
 
 func (this *Engine) Run() {

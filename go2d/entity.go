@@ -21,10 +21,37 @@ type Entity struct {
     Visible    bool
     Bounds     Rect
     Constraint Rect
-    Velocity   *Vector
-    layer      int
+    Velocity   Vector
 
     OnConstrained func(e *Entity, s RectSide)
+}
+
+func (this *Entity) IsCollidingWith(other *Entity) bool {
+    return this.Bounds.IntersectsWith(other.Bounds)
+}
+
+func (this *Entity) MoveTo(pos Vector) {
+    this.Bounds.Vector = pos
+}
+
+func (this *Entity) Push(distance Vector) {
+    this.Bounds.Vector = this.Bounds.Vector.Plus(distance)
+}
+
+func (this *Entity) FixedUpdate() {
+    this.Push(this.Velocity)
+    if ! this.Constraint.Equals(NewZeroRect(0, 0)) {
+        this.constrain(this.Constraint)
+    }
+}
+
+func (this *Entity) constrain(r Rect) {
+    constrainedSides := this.Bounds.Constrain(r)
+    if this.OnConstrained != nil {
+        for _, side := range constrainedSides {
+            this.OnConstrained(this, side)
+        }
+    }
 }
 
 func entityForInterface(iface interface{}) (Entity, error) {
@@ -47,34 +74,4 @@ func entityForInterface(iface interface{}) (Entity, error) {
     }
 
     return Entity{}, errors.New("not an instance of Entity nor does it embed Entity")
-}
-
-func (this *Entity) IsCollidingWith(other *Entity) bool {
-    return this.Bounds.IntersectsWith(other.Bounds)
-}
-
-func (this *Entity) MoveTo(pos Vector) {
-    this.Bounds.Vector = pos
-}
-
-func (this *Entity) Push(distance Vector) {
-    this.Bounds.Vector = this.Bounds.Vector.Plus(distance)
-}
-
-func (this *Entity) FixedUpdate() {
-    if this.Velocity != nil {
-        this.Push(*this.Velocity)
-    }
-    if ! this.Constraint.Equals(NewZeroRect(0, 0)) {
-        this.constrain(this.Constraint)
-    }
-}
-
-func (this *Entity) constrain(r Rect) {
-    constrainedSides := this.Bounds.Constrain(r)
-    if this.OnConstrained != nil {
-        for _, side := range constrainedSides {
-            this.OnConstrained(this, side)
-        }
-    }
 }
