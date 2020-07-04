@@ -8,9 +8,7 @@ import(
 type Paddle struct {
     *go2d.ImageEntity
     aiControlled bool
-    aiTargetBall bool
     aiSpeed      int
-    aiMoveUp     bool
 }
 
 func (this *Paddle) MouseMove(pos go2d.Vector) {
@@ -33,20 +31,6 @@ func (this *Paddle) Update(engine *go2d.Engine) {
             this.Velocity = go2d.Vector{
                 Y: this.aiSpeed,
             }
-        }
-    }
-}
-
-func (this *Paddle) Constrain(engine *go2d.Engine) []go2d.RectSide {
-    return this.Bounds.Constrain(engine.Bounds())
-}
-
-func (this *Paddle) Constrained(r go2d.RectSide) {
-    if this.aiControlled {
-        if r == go2d.RectSideBottom {
-            this.aiMoveUp = true
-        } else if r == go2d.RectSideTop {
-            this.aiMoveUp = false
         }
     }
 }
@@ -86,7 +70,6 @@ func (this *Ball) Respawn(engine *go2d.Engine) {
 }
 
 func main() {
-    go2d.SetDefaultFont("../test_resources/font.ttf", 16, "#fff")
     engine := go2d.NewEngine(
         "Pong",
         go2d.NewAspectRatio(
