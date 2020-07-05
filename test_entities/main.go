@@ -90,3 +90,8 @@ func (this *Draggable) MouseUp(button int, pos go2d.Vector) {
     this.followCursor = false
     this.MoveTo(this.originalPos)
 }
+
+func (this *Draggable) Update(engine *go2d.Engine) {
+    this.Entity.Update()
+    fmt.Printf("location: %v\n", this.Bounds.Vector)
+}

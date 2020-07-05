@@ -14,7 +14,6 @@ type Scene struct {
     PreRender     func(engine *Engine, scene *Scene)
     Render        func(engine *Engine, scene *Scene)
     Update        func(engine *Engine, scene *Scene)
-    FixedUpdate   func(engine *Engine, scene *Scene)
 
     engine        *Engine
     resources     map[string]interface{}
@@ -174,18 +173,6 @@ func (this *Scene) performUpdate(engine *Engine) {
     
     if this.Update != nil {
         this.Update(engine, this)
-    }
-}
-
-func (this *Scene) performFixedUpdate(engine *Engine) {
-    this.iterateEntities(func (s *Scene, e interface{}) {
-        _,isFixedUpdatable := e.(IFixedUpdate)
-        if isFixedUpdatable {
-            e.(IFixedUpdate).FixedUpdate(engine)
-        }
-    })
-    if this.FixedUpdate != nil {
-        this.FixedUpdate(engine, this)
     }
 }
 

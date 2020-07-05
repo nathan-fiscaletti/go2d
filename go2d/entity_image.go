@@ -99,6 +99,6 @@ func (this *ImageEntity) Render(e *Engine) {
     }
 }
 
-func (this *ImageEntity) FixedUpdate(e *Engine) {
-    this.Entity.FixedUpdate()
+func (this *ImageEntity) Update(e *Engine) {
+    this.Entity.Update()
 }

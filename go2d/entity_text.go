@@ -98,6 +98,6 @@ func (this *TextEntity) Render(e *Engine) {
     e.Canvas.FillText(this.text, float64(this.Bounds.X), float64(this.Bounds.Y + this.Bounds.Height))
 }
 
-func (this *TextEntity) FixedUpdate(e *Engine) {
-    this.Entity.FixedUpdate()
+func (this *TextEntity) Update(e *Engine) {
+    this.Entity.Update()
 }

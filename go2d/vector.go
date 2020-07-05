@@ -10,6 +10,13 @@ type Vector struct {
     Y int
 }
 
+func NewVector(x, y int) Vector {
+    return Vector{
+        X: x,
+        Y: y,
+    }
+}
+
 func NewRandomVector(max Vector) Vector {
     return NewRandomVectorWithin(
         NewZeroRect(max.X, max.Y),
@@ -26,6 +33,30 @@ func NewRandomVectorWithin(r Rect) Vector {
 
 func NewZeroVector() Vector {
     return Vector{}
+}
+
+func DirectionUp() Vector {
+    return Vector {
+        Y: -1,
+    }
+}
+
+func DirectionDown() Vector {
+    return Vector {
+        Y: 1,
+    }
+}
+
+func DirectionLeft() Vector {
+    return Vector {
+        X: -1,
+    }
+}
+
+func DirectionRight() Vector {
+    return Vector {
+        X: 1,
+    }
 }
 
 func (this *Vector) ConstrainTo(r Rect) {
@@ -46,91 +77,64 @@ func (this *Vector) ConstrainTo(r Rect) {
     }
 }
 
-func (this *Vector) Constrained(r Rect) Vector {
-    resX := this.X
-    resY := this.Y
-
-    if this.X < r.X {
-        resX = r.X
-    }
-
-    if this.Y < r.Y {
-        resY = r.Y
-    }
-
-    if this.X >= r.X + r.Width {
-        resX = r.X + r.Width - 1
-    }
-
-    if this.Y >= r.Y + r.Width {
-        resY = r.Y + r.Width - 1
-    }
-
-    return Vector{
-        X: resX,
-        Y: resY,
-    }
-}
-
-func (this *Vector) PlusY(y int) Vector {
+func (this *Vector) Copy() Vector {
     return Vector{
         X: this.X,
-        Y: this.Y + y,
-    }
-}
-
-func (this *Vector) PlusX(x int) Vector {
-    return Vector{
-        X: this.X + x,
         Y: this.Y,
     }
 }
 
-func (this *Vector) Plus(v Vector) Vector {
-    return Vector{
-        X: this.X + v.X,
-        Y: this.Y + v.Y,
-    }
+func (this Vector) Constrained(r Rect) Vector {
+    copy := this.Copy()
+    copy.ConstrainTo(r)
+    return copy
 }
 
-func (this *Vector) Times(v Vector) Vector {
-    return Vector{
-        X: this.X * v.X,
-        Y: this.Y * v.Y,
-    }
+func (this Vector) IsInsideOf(r Rect) bool {
+    return r.Contains(this)
 }
 
-func (this *Vector) IsInsideOf(r Rect) bool {
-    return r.Contains(*this)
-}
-
-func (this *Vector) IsLeftOf(v Vector) bool {
+func (this Vector) IsLeftOf(v Vector) bool {
     return this.X < v.X
 }
 
-func (this *Vector) IsRightOf(v Vector) bool {
+func (this Vector) IsRightOf(v Vector) bool {
     return this.X > v.X
 }
 
-func (this *Vector) IsAbove(v Vector) bool {
+func (this Vector) IsAbove(v Vector) bool {
     return this.Y < v.Y
 }
 
-func (this *Vector) IsBelow(v Vector) bool {
+func (this Vector) IsBelow(v Vector) bool {
     return this.Y > v.Y
 }
 
-func (this *Vector) IsZero() bool {
-    return this.Y == 0 && this.X == 0
+func (this Vector) IsZero() bool {
+    return this.Equals(NewZeroVector())
 }
 
-func (this *Vector) Equals(other Vector) bool {
+func (this Vector) Equals(other Vector) bool {
     return this.X == other.X && this.Y == other.Y
 }
 
-func (this *Vector) Negative() Vector {
+func (this Vector) Inverted() Vector {
     return Vector{
         X: -this.X,
         Y: -this.Y,
+    }
+}
+
+func (this Vector) InvertedY() Vector {
+    return Vector{
+        X: this.X,
+        Y: -this.Y,
+    }
+}
+
+func (this Vector) InvertedX() Vector {
+    return Vector{
+        X: -this.X,
+        Y: this.Y,
     }
 }

@@ -4,10 +4,6 @@ type IRender interface {
     Render(c *Engine)
 }
 
-type IFixedUpdate interface {
-    FixedUpdate(e *Engine)
-}
-
 type IUpdate interface {
     Update(e *Engine)
 }
@@ -32,9 +28,10 @@ func (this *Entity) MoveTo(pos Vector) {
 }
 
 func (this *Entity) Push(distance Vector) {
-    this.Bounds.Vector = this.Bounds.Vector.Plus(distance)
+    this.Bounds.Vector.X += distance.X
+    this.Bounds.Vector.Y += distance.Y
 }
 
-func (this *Entity) FixedUpdate() {
+func (this *Entity) Update() {
     this.Push(this.Velocity)
 }

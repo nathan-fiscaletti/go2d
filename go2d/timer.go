@@ -8,7 +8,7 @@ type Timer struct {
 }
 
 func (this *Timer) notifyUpdate(owner interface{}, scene *Scene) {
-    if scene.engine.GetHz() > 0 && (float64(this.currentTickInSecond) / float64(scene.engine.GetHz())) > this.Seconds {
+    if scene.engine.GetFPS() > 0 && (float64(this.currentTickInSecond) / float64(scene.engine.GetFPS())) > this.Seconds {
         this.Update(owner)
         this.currentTickInSecond = 0
     }
