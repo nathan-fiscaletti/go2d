@@ -6,13 +6,24 @@ import(
     "math/rand"
 )
 
+var PLAYER_SCORE  int = 0
+var CPU_SCORE     int = 0
+var SCORE_DISPLAY string = "0   0"
+
+var PADDLE_WIDTH  float64 = 32
+var PADDLE_HEIGHT float64 = PADDLE_WIDTH * 3
+var BALL_SIZE     float64 = 32
+
+var AI_PADDLE_SPEED float64 = 5
+var AI_BALL_SPEED   float64 = 10
+
 type ScoreDisplay struct {
     *go2d.TextEntity
 }
 
 func (this *ScoreDisplay) Update(engine *go2d.Engine) {
     this.Entity.Update()
-    this.SetText(engine.GetScene().GetResource("score").(string))
+    this.SetText(SCORE_DISPLAY)
 }
 
 type Paddle struct {
@@ -60,11 +71,49 @@ func (this *Ball) Update(engine *go2d.Engine) {
     this.Entity.Update()
     player := engine.GetScene().GetEntity(1, "player").(*Paddle)
     cpu    := engine.GetScene().GetEntity(1, "cpu").(*Paddle)
+
+    // handle paddle collision
     if this.Entity.CollidesWith(&player.Entity) || this.Entity.CollidesWith(&cpu.Entity) {
         this.direction = this.direction.InvertedX()
+
+        var collidingEntity *Paddle
+        
+        if this.Entity.CollidesWith(&player.Entity) {
+            collidingEntity = player
+        } else {
+            collidingEntity = cpu
+        }
+
+        yMax := float64(10)
+        yMin := float64(-10)
+
+        deadzone := float64(10)
+        if this.Bounds.Y > collidingEntity.Bounds.Center().Y - deadzone / 2 &&
+           this.Bounds.Y < collidingEntity.Bounds.Center().Y + deadzone / 2 {
+            yMax = 0
+            yMin = 0
+        }
+
+        if this.Bounds.IsAbove(collidingEntity.Bounds.Center()) {
+            yMax = 2
+        } else {
+            yMin = -2
+        }
+
         this.Velocity = go2d.Vector {
             X: this.aiSpeed * this.direction.X,
-            Y: -10 + rand.Float64() * (10 - -10),
+            Y: yMin + rand.Float64() * (yMax - yMin),
+        }
+    } else {
+        // handle scoring
+        if this.Bounds.X < PADDLE_WIDTH {
+            CPU_SCORE += 1
+            SCORE_DISPLAY = fmt.Sprintf("%v   %v", PLAYER_SCORE, CPU_SCORE)
+            this.Respawn(go2d.GetActiveEngine(), go2d.DirectionLeft())
+        } else if this.Bounds.X > engine.Bounds().Width - PADDLE_WIDTH {
+            PLAYER_SCORE += 1
+            SCORE_DISPLAY = fmt.Sprintf("%v   %v", PLAYER_SCORE, CPU_SCORE)
+            this.Respawn(go2d.GetActiveEngine(), go2d.DirectionRight())
         }
     }
 }
@@ -76,14 +125,6 @@ func (this *Ball) Constrain(engine *go2d.Engine) []go2d.RectSide {
 func (this *Ball) Constrained(r go2d.RectSide) {
     if r == go2d.RectSideTop || r == go2d.RectSideBottom {
         this.Velocity.Y = -this.Velocity.Y
-    } else if r == go2d.RectSideLeft {
-        go2d.GetActiveScene().SetResource("cpuScore", go2d.GetActiveScene().GetResource("cpuScore").(int) + 1)
-        go2d.GetActiveScene().SetResource("score", fmt.Sprintf("%v   %v", go2d.GetActiveScene().GetResource("playerScore").(int), go2d.GetActiveScene().GetResource("cpuScore").(int)))
-        this.Respawn(go2d.GetActiveEngine(), go2d.DirectionLeft())
-    } else if r == go2d.RectSideRight {
-        go2d.GetActiveScene().SetResource("playerScore", go2d.GetActiveScene().GetResource("playerScore").(int) + 1)
-        go2d.GetActiveScene().SetResource("score", fmt.Sprintf("%v   %v", go2d.GetActiveScene().GetResource("playerScore").(int), go2d.GetActiveScene().GetResource("cpuScore").(int)))
-        this.Respawn(go2d.GetActiveEngine(), go2d.DirectionRight())
     }
 }
 
@@ -113,9 +154,6 @@ func main() {
         scoreDisplay := &ScoreDisplay{
             TextEntity: score,
         }
-        scene.SetResource("score", "0   0")
-        scene.SetResource("playerScore", 0)
-        scene.SetResource("cpuScore", 0)
         scene.AddNamedEntity("score", 3, scoreDisplay)
 
         line := go2d.NewLineEntity(
@@ -129,8 +167,8 @@ func main() {
         scene.AddEntity(1, line)
 
         paddleImage := go2d.NewRectImageEntity("#FFFFFF", go2d.Dimensions{
-            Width: 32,
-            Height: 96,
+            Width: PADDLE_WIDTH,
+            Height: PADDLE_HEIGHT,
         })
 
         paddle := &Paddle{
@@ -146,14 +184,14 @@ func main() {
         scene.AddNamedEntity("player", 1, paddle)
 
         paddleImage2 := go2d.NewRectImageEntity("#FFFFFF", go2d.Dimensions{
-            Width: 32,
-            Height: 96,
+            Width: PADDLE_WIDTH,
+            Height: PADDLE_HEIGHT,
         })
 
         cpupaddle := &Paddle{
             ImageEntity: paddleImage2,
             aiControlled: true,
-            aiSpeed: 5,
+            aiSpeed: AI_PADDLE_SPEED,
         }
 
         cpupaddle.MoveTo(go2d.Vector{
@@ -163,10 +201,10 @@ func main() {
 
         scene.AddNamedEntity("cpu", 1, cpupaddle)
 
-        ballImage := go2d.NewCircleImageEntity("#FFFFFF", 32)
+        ballImage := go2d.NewCircleImageEntity("#FFFFFF", int(BALL_SIZE))
         ball := &Ball{
             ImageEntity: ballImage,
-            aiSpeed: 10,
+            aiSpeed: AI_BALL_SPEED,
         }
 
         ball.Respawn(engine, go2d.DirectionRight())
