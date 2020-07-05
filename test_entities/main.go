@@ -1,7 +1,6 @@
 package main
 
 import (
-    "fmt"
     "../go2d"
 )
 
@@ -70,16 +69,15 @@ type Draggable struct {
 // MouseMove event for the Draggable entity
 func (this *Draggable) MouseMove(pos go2d.Vector) {
     if this.followCursor {
-        this.MoveTo(pos.Plus(go2d.Vector{
-            X: -(this.Bounds.Width / 2),
-            Y: -(this.Bounds.Height / 2),
-        }))
+        this.MoveTo(go2d.Vector{
+            X: pos.X - (this.Bounds.Width / 2),
+            Y: pos.Y - (this.Bounds.Height / 2),
+        })
     }
 }
 
 // Mouse down event for the draggable entity
 func (this *Draggable) MouseDown(button int, pos go2d.Vector) {
-    fmt.Printf("mouse down: %v\n", pos)
     if this.Bounds.Contains(pos) {
         this.followCursor = true
     }
@@ -93,5 +91,4 @@ func (this *Draggable) MouseUp(button int, pos go2d.Vector) {
 
 func (this *Draggable) Update(engine *go2d.Engine) {
     this.Entity.Update()
-    fmt.Printf("location: %v\n", this.Bounds.Vector)
 }
