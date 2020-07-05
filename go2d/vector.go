@@ -1,16 +1,17 @@
 package go2d
 
 import (
+    "math"
     "math/rand"
     "time"
 )
 
 type Vector struct {
-    X int
-    Y int
+    X float64
+    Y float64
 }
 
-func NewVector(x, y int) Vector {
+func NewVector(x, y float64) Vector {
     return Vector{
         X: x,
         Y: y,
@@ -26,8 +27,8 @@ func NewRandomVector(max Vector) Vector {
 func NewRandomVectorWithin(r Rect) Vector {
     rand.Seed(time.Now().UnixNano())
     return Vector{
-        X: rand.Intn(r.X+r.Width-r.X) + r.X,
-        Y: rand.Intn(r.Y+r.Height-r.Y) + r.Y,
+        X: r.X + rand.Float64() * (r.X+r.Width - r.X),
+        Y: r.Y + rand.Float64() * (r.Y+r.Width - r.Y),
     }
 }
 
@@ -57,6 +58,22 @@ func DirectionRight() Vector {
     return Vector {
         X: 1,
     }
+}
+
+func (this *Vector) DirectionTo(other Vector) Vector {
+    angle := this.AngleTo(other)
+    return Vector{
+        X: math.Cos(angle),
+        Y: math.Sin(angle),
+    }
+}
+
+func (this *Vector) DistanceTo(other Vector) float64 {
+    return math.Sqrt(math.Pow(this.X - other.X, 2) + math.Pow(this.Y - other.Y, 2))
+}
+
+func (this *Vector) AngleTo(other Vector) float64 {
+    return math.Atan2(other.Y - this.Y, other.X - this.X)
 }
 
 func (this *Vector) ConstrainTo(r Rect) {

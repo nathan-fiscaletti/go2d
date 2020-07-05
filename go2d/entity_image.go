@@ -27,8 +27,8 @@ func NewImageEntity(img image.Image) *ImageEntity {
             Visible: true,
             Bounds: Rect{
                 Dimensions: Dimensions{
-                    Width:  img.Bounds().Dx(),
-                    Height: img.Bounds().Dy(),
+                    Width:  float64(img.Bounds().Dx()),
+                    Height: float64(img.Bounds().Dy()),
                 },
             },
         },
@@ -49,14 +49,14 @@ func LoadImageEntity(path string) (*ImageEntity, error) {
 }
 
 func NewRectImageEntity(color string, dimensions Dimensions) *ImageEntity {
-    backend := softwarebackend.New(dimensions.Width, dimensions.Height)
+    backend := softwarebackend.New(int(dimensions.Width), int(dimensions.Height))
     cv := canvas.New(backend)
 
     cv.SetFillStyle(color)
     cv.Rect(0, 0, float64(dimensions.Width), float64(dimensions.Height))
     cv.Fill()
     
-    img := cv.GetImageData(0, 0, dimensions.Width, dimensions.Height)
+    img := cv.GetImageData(0, 0, int(dimensions.Width), int(dimensions.Height))
 
     return NewImageEntity(img)
 }

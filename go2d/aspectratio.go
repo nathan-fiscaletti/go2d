@@ -12,7 +12,7 @@ type AspectRatio struct {
     ControlAxis AspectRatioControlAxis
 }
 
-func NewAspectRatio(w int, h int, c AspectRatioControlAxis) *AspectRatio {
+func NewAspectRatio(w float64, h float64, c AspectRatioControlAxis) *AspectRatio {
     return &AspectRatio{
         Dimensions: Dimensions {
             Width: w,
@@ -22,7 +22,7 @@ func NewAspectRatio(w int, h int, c AspectRatioControlAxis) *AspectRatio {
     }
 }
 
-func (this *AspectRatio) NewDimensions(v int) Dimensions {
+func (this *AspectRatio) NewDimensions(v float64) Dimensions {
     if this.ControlAxis == AspectRatioControlAxisHeight {
         return Dimensions{
             Height: v,

@@ -8,8 +8,11 @@ type IUpdate interface {
     Update(e *Engine)
 }
 
-type IConstrained interface {
+type IConstrain interface {
     Constrain(e *Engine) []RectSide
+}
+
+type IConstrained interface {
     Constrained(s RectSide)
 }
 

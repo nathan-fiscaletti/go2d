@@ -27,6 +27,28 @@ func (a ByLayer) Len() int           { return len(a)}
 func (a ByLayer) Less(i, j int) bool { return a[i] < a[j] }
 func (a ByLayer) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
+func GetActiveScene() *Scene {
+    engineCount := len(GetActiveEngines())
+    if engineCount < 1 {
+        return nil
+    }
+
+    if engineCount > 1 {
+        panic("More than one running Engine. Please use GetActiveScenes().")
+    }
+
+    return GetActiveEngine().GetScene()
+}
+
+func GetActiveScenes() []*Scene {
+    scenes := []*Scene{}
+    for _,e := range GetActiveEngines() {
+        scenes = append(scenes, e.GetScene())
+    }
+
+    return scenes
+}
+
 func NewScene(engine *Engine, name string) Scene {
     return Scene {
         engine: engine,
@@ -157,11 +179,14 @@ func (this *Scene) performUpdate(engine *Engine) {
     }
 
     this.iterateEntities(func (s *Scene, e interface{}) {
-        _,isConstrained := e.(IConstrained)
-        if isConstrained {
-            constrainedSides := e.(IConstrained).Constrain(engine)
-            for _, side := range constrainedSides {
-                e.(IConstrained).Constrained(side)
+        _,isConstrain := e.(IConstrain)
+        if isConstrain {
+            constrainedSides := e.(IConstrain).Constrain(engine)
+            _,isConstrained := e.(IConstrained)
+            if isConstrained {
+                for _, side := range constrainedSides {
+                    e.(IConstrained).Constrained(side)
+                }
             }
         }
 

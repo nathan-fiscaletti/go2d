@@ -34,9 +34,9 @@ func (this *SpriteSheet) GetSprite(location Vector) image.Image {
         SubImage(r image.Rectangle) image.Image
     }).SubImage(
         image.Rect(
-            location.X*this.Row,
-            location.Y*this.Column,
-            (location.X*this.Row)+this.Row,
-            (location.Y*this.Column)+this.Column),
+            int(location.X*float64(this.Row)),
+            int(location.Y*float64(this.Column)),
+            int((location.X*float64(this.Row))+float64(this.Row)),
+            int((location.Y*float64(this.Column))+float64(this.Column))),
     )
 }

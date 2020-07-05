@@ -14,11 +14,11 @@ type Rect struct {
     Dimensions
 }
 
-func NewZeroRect(w int, h int) Rect {
+func NewZeroRect(w, h float64) Rect {
     return NewRect(0, 0, w, h)
 }
 
-func NewRect(x int, y int, w int, h int) Rect {
+func NewRect(x, y, w, h float64) Rect {
     return Rect {
         Vector: Vector {
             X: x,

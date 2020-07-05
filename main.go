@@ -1,151 +1,87 @@
 package main
-
-// brew install sdl2{,_image,_mixer,_ttf,_gfx} pkg-config
-// go get https://github.com/tfriedel6/canvas/sdlcanvas
-
-// "github.com/tfriedel6/canvas/sdlcanvas"
-
-import (
+import(
     "fmt"
-
-    "./go2d"
+    "github.com/tfriedel6/canvas"
+    "github.com/tfriedel6/canvas/sdlcanvas"
+    "github.com/tfriedel6/canvas/backend/softwarebackend"
 )
-
-type Spaceship struct {
-    *go2d.ImageEntity
-}
-
-func (this *Spaceship) KeyDown(scancode int, rn rune, name string) {
-    if name == "ArrowDown" {
-        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:1}
-    } else if name == "ArrowUp" {
-        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:-1}
-    } else if name == "ArrowLeft" {
-        this.Velocity = go2d.Vector{X:-1, Y:this.Velocity.Y}
-    } else if name == "ArrowRight" {
-        this.Velocity = go2d.Vector{X:1, Y:this.Velocity.Y}
-    }
-}
-
-func (this *Spaceship) KeyUp(scancode int, rn rune, name string) {
-    if name == "ArrowDown" || name == "ArrowUp" {
-        this.Velocity = go2d.Vector{X:this.Velocity.X, Y:0}
-    } else if name == "ArrowLeft" || name == "ArrowRight"{
-        this.Velocity = go2d.Vector{X:0, Y:this.Velocity.Y}
-    }
-}
-
-func (this *Spaceship) MouseDown(button int, pos go2d.Vector) {
-    if button == go2d.MOUSE_BUTTON_LEFT {
-        if this.Bounds.Contains(pos) {
-            fmt.Printf("clicked on spaceship")
-        }
-    }
-}
-
 func main() {
-
-    // Create a new Engine
-    engine := go2d.NewEngine(
-        "My Engine",
-
-        // Set the engine to 16x9 aspect ratio with 1200 width.
-        go2d.NewAspectRatio(
-            16, 9, go2d.AspectRatioControlAxisWidth,
-        ).NewDimensions(1200),
-    )
-
-    // Set the Tick Rate of the Engine to ~60hz
-    engine.TickHz = 60
-
-    // Create the new Scene
-    scene := go2d.NewScene(engine, "Main Scene")
-
-    // Set the LoadResources callback for the Scene
-    scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
-        blue, err := go2d.LoadImageEntity("./test_resources/blue.png")
-        if err != nil {
-            panic(err)
-        }
-        red, err := go2d.LoadImageEntity("./test_resources/red.png")
-        if err != nil {
-            panic(err)
-        }
-
-        // Update the images velocity to move one pixel per tick.
-        // TODO: Update velocity to be based on PixelsPerSecond
-        blue.Velocity = go2d.Vector{X: 10, Y: 0}
-        red.Velocity = go2d.Vector{X: 0, Y: 10}
-        
-        blue.Entity.Constraint = engine.Bounds()
-        red.Entity.Constraint = engine.Bounds()
-
-        //scene.AddNamedEntity("blue", 1, blue)
-        //scene.AddNamedEntity("red", 2, red)
-
-        go2d.SetDefaultFont("./test_resources/font.ttf", 40, "#fff")
-
-        fps := go2d.NewTextEntitySimple("FPS: 0")
-        fps.Measure(engine)
-        scene.AddNamedEntity("fps", 3, fps)
-
-        tps := go2d.NewTextEntitySimple("TPS: 0")
-        tps.Bounds.X = fps.Bounds.X + fps.Bounds.Width + 20
-        scene.AddNamedEntity("tps", 3, tps)
-
-        spriteSheet,err := go2d.NewSpriteSheet("./test_resources/sprite_sheet.png", 32, 32)
-        if err != nil {
-            panic(err)
-        }
-        spaceShipImg := spriteSheet.GetSprite(go2d.Vector{X:0, Y:0})
-
-        spaceShip := go2d.NewImageEntity(spaceShipImg)
-        spaceShip.MoveTo(go2d.Vector{
-            X: 0,
-            Y: 0,
-        })
-
-        spaceShipFinal := Spaceship{
-            ImageEntity: spaceShip,
-        }
-        scene.AddNamedEntity("ss", 4, &spaceShipFinal)
-
-        //circle := go2d.NewCircleImageEntity("#00FF00", 32)
-        circle := go2d.NewRectImageEntity("#00FF00", go2d.Dimensions{Width: 32, Height:96})
-        circle.MoveTo(go2d.Vector{
-            X:32, Y: 32,
-        })
-
-        scene.AddNamedEntity("circle", 5, circle)
+    // The size i would like my window to be
+    screenW := 1600
+    screenH := 900
+    // The size i would like the draggable square in the center to be.
+    squareSize := 128
+    wnd, cv, err := sdlcanvas.CreateWindow(screenW, screenH, "Example")
+    if err != nil {
+        panic(err)
     }
-
-    // Set the Scene for the Engine
-    engine.SetScene(&scene)
-
-    engine.OnFPSUpdated = func(engine *go2d.Engine, fps int) {
-        fpsDisplay := engine.GetScene().GetEntity(3, "fps").(*go2d.TextEntity)
-        fpsDisplay.SetText(fmt.Sprintf("FPS: %v", fps))
-
-        if fps < 60 {
-            fpsDisplay.SetTextColor("#ff0000")
-        } else {
-            fpsDisplay.SetTextColor("#fff")
-        }
-
-        tpsDisplay := engine.GetScene().GetEntity(3, "tps").(*go2d.TextEntity)
-        tpsDisplay.Bounds.X = fpsDisplay.Bounds.X + fpsDisplay.Bounds.Width + 20
+    fmt.Printf("Desired: %v w x %v h\n", screenW, screenH)
+    fmt.Printf("Actual: %v w x %v h\n", cv.Width(), cv.Height())
+    // Create a square. This square will be displayed in the center
+    // of the window and should be draggable.
+    backend := softwarebackend.New(squareSize, squareSize)
+    cvImg := canvas.New(backend)
+    cvImg.SetFillStyle("#FFF")
+    cvImg.Rect(0, 0, 64, 64)
+    cvImg.Fill()
+    img := cvImg.GetImageData(0, 0, squareSize, squareSize)
+    // Load the square into the main canvas as an image.
+    imgFinal, err := cv.LoadImage(img)
+    if err != nil {
+        panic(err)
     }
-
-    engine.OnTickRateUpdated = func(engine *go2d.Engine, tps int) {
-        tpsDisplay := engine.GetScene().GetEntity(3, "tps").(*go2d.TextEntity)
-        if tps < engine.TickHz {
-            tpsDisplay.SetTextColor("#ff0000")
-        } else {
-            tpsDisplay.SetTextColor("#fff")
-        }
-        tpsDisplay.SetText(fmt.Sprintf("TPS: %v", tps))
+    // Starting position for the square
+    xStartPos := (screenW / 2) - (squareSize / 2)
+    yStartPos := (screenH / 2) - (squareSize / 2)
+    // Active position for the square
+    xPos := xStartPos
+    yPos := yStartPos
+    // Basic properties for tracking the cursor
+    followMouse := false
+    // When the mouse is released, stop following it and 
+    // snap the square back to it's original pos.
+    wnd.MouseUp = func(b, x, y int) {
+        followMouse = false
+        xPos = xStartPos
+        yPos = yStartPos
     }
-
-    // Run the Engine
-    engine.Run()
+    // Only begin following the cursor if the square is clicked.
+    wnd.MouseDown = func(b, x, y int) {
+        if x > xStartPos && x < xStartPos + squareSize {
+            if y > yStartPos && y < yStartPos + squareSize {
+                followMouse = true
+            }
+        }
+    }
+    // When the mouse is moved, if we should be following the cursor
+    // update the location of the square to match that of the cursor.
+    wnd.MouseMove = func(x, y int) {
+        if followMouse {
+            xPos = x - (squareSize / 2)
+            yPos = y - (squareSize / 2)
+        }
+    }
+    defer wnd.Destroy()
+    // Start the main loop for rendering.
+    wnd.MainLoop(func() {
+        // I've been able to determine that for some reason, my canvas
+        // is not the same size as the initial values i had originally
+        // passed to sdlcanvas.CreateWindow().
+        // This seems to properly fill the entire canvas
+        w, h := float64(cv.Width()), float64(cv.Height())
+        cv.SetFillStyle("#fff")
+        cv.FillRect(0, 0, w, h)
+        // This does not fill the entire canvas.
+        w2, h2 := float64(screenW), float64(screenH)
+        cv.SetFillStyle("#000")
+        cv.FillRect(0, 0, w2, h2)
+        // This should be in the center of the window when it is first
+        // spawned but instead is is in the center of the top left
+        // quadrant of the window, which happens to be the center of
+        // the true canvas.
+        cv.DrawImage(imgFinal, float64(xPos), 
+                               float64(yPos), 
+                               float64(squareSize), 
+                               float64(squareSize))
+    })
 }
