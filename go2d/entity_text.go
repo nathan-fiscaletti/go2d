@@ -6,7 +6,7 @@ type TextEntity struct {
     textColor     string
     text          string
     font          string
-    fontSize      int
+    fontSize      float64
 
     centeredIn    Rect
     textCentering TextCentering
@@ -22,10 +22,10 @@ const (
 )
 
 var defaultFont string
-var defaultFontSize int
+var defaultFontSize float64
 var defaultTextColor string
 
-func NewTextEntity(text string, font string, fontSize int, textColor string) *TextEntity {
+func NewTextEntity(text string, font string, fontSize float64, textColor string) *TextEntity {
     return &TextEntity{
         text:       text,
         font:       font,
@@ -63,7 +63,7 @@ func NewTextEntitySimple(text string) *TextEntity {
     }
 }
 
-func SetDefaultFont(font string, fontSize int, textColor string) {
+func SetDefaultFont(font string, fontSize float64, textColor string) {
     defaultFont = font
     defaultFontSize = fontSize
     defaultTextColor = textColor
@@ -82,7 +82,7 @@ func (this *TextEntity) SetText(text string) {
     this.isMeasured = false
 }
 
-func (this *TextEntity) SetFontSize(fontSize int) {
+func (this *TextEntity) SetFontSize(fontSize float64) {
     this.fontSize = fontSize
     this.isMeasured = false
 }
@@ -110,11 +110,11 @@ func (this *TextEntity) Measure(e *Engine) {
     }
 
     if this.textCentering & TEXT_CENTERING_VERTICAL != 0 {
-        this.Bounds.Vector.Y = float64(centeredIn.Height / 2 - this.Bounds.Height / 2)
+        this.Bounds.Vector.Y = centeredIn.Height / 2 - this.Bounds.Height / 2
     } 
     
     if this.textCentering & TEXT_CENTERING_HORIZONTAL != 0 {
-        this.Bounds.Vector.X = float64(centeredIn.Width / 2 - this.Bounds.Width / 2)
+        this.Bounds.Vector.X = centeredIn.Width / 2 - this.Bounds.Width / 2
     }
 
     this.isMeasured = true
@@ -125,9 +125,9 @@ func (this *TextEntity) Render(e *Engine) {
         this.Measure(e)
     }
 
-    e.Canvas.SetFont(this.font, float64(this.fontSize))
+    e.Canvas.SetFont(this.font, this.fontSize)
     e.Canvas.SetFillStyle(this.textColor)
-    e.Canvas.FillText(this.text, this.Bounds.X, this.Bounds.Y + float64(this.Bounds.Height))
+    e.Canvas.FillText(this.text, this.Bounds.X, this.Bounds.Y + this.Bounds.Height)
 }
 
 func (this *TextEntity) Update(e *Engine) {

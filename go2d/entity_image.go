@@ -53,7 +53,7 @@ func NewRectImageEntity(color string, dimensions Dimensions) *ImageEntity {
     cv := canvas.New(backend)
 
     cv.SetFillStyle(color)
-    cv.Rect(0, 0, float64(dimensions.Width), float64(dimensions.Height))
+    cv.Rect(0, 0, dimensions.Width, dimensions.Height)
     cv.Fill()
     
     img := cv.GetImageData(0, 0, int(dimensions.Width), int(dimensions.Height))
@@ -91,10 +91,10 @@ func (this *ImageEntity) Render(e *Engine) {
     if this.Visible {
         e.Canvas.DrawImage(
             this.cImg,
-            float64(this.Bounds.X),
-            float64(this.Bounds.Y),
-            float64(this.Bounds.Width),
-            float64(this.Bounds.Height),
+            this.Bounds.X,
+            this.Bounds.Y,
+            this.Bounds.Width,
+            this.Bounds.Height,
         )
     }
 }
