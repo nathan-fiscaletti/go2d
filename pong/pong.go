@@ -13,7 +13,7 @@ var PADDLE_HEIGHT            float64       = PADDLE_WIDTH * 5
 var BALL_SIZE                float64       = 32
 var AI_PADDLE_RATE           float64       = 5
 var AI_PADDLE_TIME           time.Duration = go2d.TICK_DURATION
-var AI_BALL_RATE             float64       = 10
+var AI_BALL_RATE             float64       = 20
 var AI_BALL_TIME             time.Duration = go2d.TICK_DURATION
 
 // Used by the game during run time
