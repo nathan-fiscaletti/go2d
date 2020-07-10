@@ -16,6 +16,11 @@ var AI_PADDLE_TIME           time.Duration = go2d.TICK_DURATION
 var AI_BALL_RATE             float64       = 20
 var AI_BALL_TIME             time.Duration = go2d.TICK_DURATION
 
+var PLAYER_CONTROL_MOUSE     bool          = false
+var PLAYER_CONTROL_KEY       bool          = true
+var PLAYER_PADDLE_RATE       float64       = 10
+var PLAYER_PADDLE_TIME       time.Duration = go2d.TICK_DURATION
+
 // Used by the game during run time
 var PLAYER_PADDLE_MULTIPLIER float64       = 0
 var CPU_PADDLE_MULTIPLIER    float64       = 0
@@ -38,11 +43,29 @@ type Paddle struct {
 }
 
 func (this *Paddle) MouseMove(pos go2d.Vector) {
-    if !this.aiControlled {
+    if !this.aiControlled && PLAYER_CONTROL_MOUSE {
         this.MoveTo(go2d.Vector{
             X: this.Bounds.X,
             Y: pos.Y - (this.Bounds.Height / 2),
         })
+    }
+}
+
+func (this *Paddle) KeyDown(scancode int, rn rune, name string) {
+    if !this.aiControlled && PLAYER_CONTROL_KEY {
+        if name == "ArrowUp" {
+            this.Entity.Velocity = go2d.NewVelocityVector(0, -PLAYER_PADDLE_RATE, PLAYER_PADDLE_TIME)
+        } else if name == "ArrowDown" {
+            this.Entity.Velocity = go2d.NewVelocityVector(0, PLAYER_PADDLE_RATE, PLAYER_PADDLE_TIME)
+        }
+    }
+}
+
+func (this *Paddle) KeyUp(scancode int, rn rune, name string) {
+    if !this.aiControlled {
+        if name == "ArrowUp" || name == "ArrowDown" {
+            this.Entity.Velocity =go2d. NewVelocityVector(0, 0, PLAYER_PADDLE_TIME)
+        }
     }
 }
 
@@ -51,13 +74,17 @@ func (this *Paddle) Update(engine *go2d.Engine) {
     if this.aiControlled {
         this.Bounds.Height = PADDLE_HEIGHT - (CPU_PADDLE_MULTIPLIER * PADDLE_HEIGHT)
         ball := engine.GetScene().GetEntity(2, "ball").(*Ball)
-        if ball.Bounds.Y < this.Bounds.Y + (this.Bounds.Height / 2) {
+        if ball.Bounds.Y < this.Bounds.Y + (this.Bounds.Height / 2) - BALL_SIZE {
             this.Velocity = go2d.NewVelocityVector(
                 0, -AI_PADDLE_RATE, AI_PADDLE_TIME,
             )
-        } else if ball.Bounds.Y > this.Bounds.Y + (this.Bounds.Height / 2) {
+        } else if ball.Bounds.Y > this.Bounds.Y + (this.Bounds.Height / 2) + BALL_SIZE {
             this.Velocity = go2d.NewVelocityVector(
                 0, AI_PADDLE_RATE, AI_PADDLE_TIME,
+            )
+        } else {
+            this.Velocity = go2d.NewVelocityVector(
+                0, 0, AI_PADDLE_TIME,
             )
         }
     } else {
