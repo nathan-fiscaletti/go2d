@@ -118,7 +118,7 @@ func (this *Engine) SetScene(scene *Scene) {
         this.scene.ClearResources()
     }
     this.scene = scene
-    this.scene.LoadResources(this, this.scene)
+    this.scene.Initialize(this, this.scene)
     this.window.Window.SetTitle(fmt.Sprintf("%s - %s", this.Name, this.scene.Name))
 
     this.renderMux.Unlock()

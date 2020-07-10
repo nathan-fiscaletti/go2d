@@ -6,6 +6,38 @@ import (
     "time"
 )
 
+const TICK_DURATION = time.Duration(0)
+
+type VelocityVector struct {
+    Vector
+    Duration time.Duration
+}
+
+func NewVelocityVector(x, y float64, d time.Duration) VelocityVector {
+    return VelocityVector{
+        Vector: Vector{
+            X: x,
+            Y: y,
+        },
+        Duration: d,
+    }
+}
+
+func (this VelocityVector) GetNextMovement() Vector {
+    if this.Duration == TICK_DURATION {
+        return this.Vector
+    }
+
+    framesPerNanoSecond := 60 * time.Second
+    desiredXMovementPerNanoSecond := this.Vector.X / float64(this.Duration)
+    desiredYMovementPerNanoSecond := this.Vector.Y / float64(this.Duration)
+
+    return Vector{
+        X: float64(framesPerNanoSecond) / desiredXMovementPerNanoSecond,
+        Y: float64(framesPerNanoSecond) / desiredYMovementPerNanoSecond,
+    }
+}
+
 type Vector struct {
     X float64
     Y float64

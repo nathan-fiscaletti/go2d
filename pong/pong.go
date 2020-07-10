@@ -2,20 +2,26 @@ package main
 
 import(
     "fmt"
+    "time"
     "../go2d"
     "math/rand"
 )
 
-var PLAYER_SCORE  int = 0
-var CPU_SCORE     int = 0
-var SCORE_DISPLAY string = "0   0"
+// Game Configuration
+var PADDLE_WIDTH             float64       = 32
+var PADDLE_HEIGHT            float64       = PADDLE_WIDTH * 5
+var BALL_SIZE                float64       = 32
+var AI_PADDLE_RATE           float64       = 5
+var AI_PADDLE_TIME           time.Duration = go2d.TICK_DURATION
+var AI_BALL_RATE             float64       = 10
+var AI_BALL_TIME             time.Duration = go2d.TICK_DURATION
 
-var PADDLE_WIDTH  float64 = 32
-var PADDLE_HEIGHT float64 = PADDLE_WIDTH * 3
-var BALL_SIZE     float64 = 32
-
-var AI_PADDLE_SPEED float64 = 5
-var AI_BALL_SPEED   float64 = 10
+// Used by the game during run time
+var PLAYER_PADDLE_MULTIPLIER float64       = 0
+var CPU_PADDLE_MULTIPLIER    float64       = 0
+var PLAYER_SCORE             int           = 0
+var CPU_SCORE                int           = 0
+var SCORE_DISPLAY            string        = "0   0"
 
 type ScoreDisplay struct {
     *go2d.TextEntity
@@ -29,7 +35,6 @@ func (this *ScoreDisplay) Update(engine *go2d.Engine) {
 type Paddle struct {
     *go2d.ImageEntity
     aiControlled bool
-    aiSpeed      float64
 }
 
 func (this *Paddle) MouseMove(pos go2d.Vector) {
@@ -44,16 +49,19 @@ func (this *Paddle) MouseMove(pos go2d.Vector) {
 func (this *Paddle) Update(engine *go2d.Engine) {
     this.Entity.Update()
     if this.aiControlled {
+        this.Bounds.Height = PADDLE_HEIGHT - (CPU_PADDLE_MULTIPLIER * PADDLE_HEIGHT)
         ball := engine.GetScene().GetEntity(2, "ball").(*Ball)
         if ball.Bounds.Y < this.Bounds.Y + (this.Bounds.Height / 2) {
-            this.Velocity = go2d.Vector{
-                Y: -this.aiSpeed,
-            }
+            this.Velocity = go2d.NewVelocityVector(
+                0, -AI_PADDLE_RATE, AI_PADDLE_TIME,
+            )
         } else if ball.Bounds.Y > this.Bounds.Y + (this.Bounds.Height / 2) {
-            this.Velocity = go2d.Vector{
-                Y: this.aiSpeed,
-            }
+            this.Velocity = go2d.NewVelocityVector(
+                0, AI_PADDLE_RATE, AI_PADDLE_TIME,
+            )
         }
+    } else {
+        this.Bounds.Height = PADDLE_HEIGHT - (PLAYER_PADDLE_MULTIPLIER * PADDLE_HEIGHT)
     }
 }
 
@@ -63,7 +71,6 @@ func (this *Paddle) Constrain(engine *go2d.Engine) []go2d.RectSide {
 
 type Ball struct {
     *go2d.ImageEntity
-    aiSpeed float64
     direction go2d.Vector
 }
 
@@ -80,8 +87,10 @@ func (this *Ball) Update(engine *go2d.Engine) {
         
         if this.Entity.CollidesWith(&player.Entity) {
             collidingEntity = player
+            PLAYER_PADDLE_MULTIPLIER += 0.05
         } else {
             collidingEntity = cpu
+            CPU_PADDLE_MULTIPLIER += 0.05
         }
 
         yMax := float64(10)
@@ -100,19 +109,22 @@ func (this *Ball) Update(engine *go2d.Engine) {
             yMin = -2
         }
 
-        this.Velocity = go2d.Vector {
-            X: this.aiSpeed * this.direction.X,
-            Y: yMin + rand.Float64() * (yMax - yMin),
-        }
+        this.Velocity = go2d.NewVelocityVector(
+            AI_BALL_RATE * this.direction.X, 
+            yMin + rand.Float64() * (yMax - yMin), 
+            AI_BALL_TIME,
+        )
     } else {
         // handle scoring
         if this.Bounds.X < PADDLE_WIDTH {
             CPU_SCORE += 1
             SCORE_DISPLAY = fmt.Sprintf("%v   %v", PLAYER_SCORE, CPU_SCORE)
+            PLAYER_PADDLE_MULTIPLIER = 0
             this.Respawn(go2d.GetActiveEngine(), go2d.DirectionLeft())
         } else if this.Bounds.X > engine.Bounds().Width - PADDLE_WIDTH {
             PLAYER_SCORE += 1
             SCORE_DISPLAY = fmt.Sprintf("%v   %v", PLAYER_SCORE, CPU_SCORE)
+            CPU_PADDLE_MULTIPLIER = 0
             this.Respawn(go2d.GetActiveEngine(), go2d.DirectionRight())
         }
     }
@@ -131,10 +143,11 @@ func (this *Ball) Constrained(r go2d.RectSide) {
 func (this *Ball) Respawn(engine *go2d.Engine, direction go2d.Vector) {
     this.direction = direction
     this.MoveTo(engine.Bounds().Center())
-    this.Velocity = go2d.Vector{
-        X: this.direction.X * this.aiSpeed,
-        Y: -10 + rand.Float64() * (10 - -10),
-    }
+    this.Velocity = go2d.NewVelocityVector(
+        this.direction.X * AI_BALL_RATE,
+        -10 + rand.Float64() * (10 - -10),
+        AI_BALL_TIME,
+    )
 }
 
 func main() {
@@ -146,7 +159,7 @@ func main() {
     )
 
     scene := go2d.NewScene(engine, "Level 1")
-    scene.LoadResources = func(engine *go2d.Engine, scene *go2d.Scene) {
+    scene.Initialize = func(engine *go2d.Engine, scene *go2d.Scene) {
         go2d.SetDefaultFont("../test_resources/font.ttf", 24, "#fff")
 
         score := go2d.NewTextEntitySimple("0   0")
@@ -191,7 +204,6 @@ func main() {
         cpupaddle := &Paddle{
             ImageEntity: paddleImage2,
             aiControlled: true,
-            aiSpeed: AI_PADDLE_SPEED,
         }
 
         cpupaddle.MoveTo(go2d.Vector{
@@ -204,13 +216,14 @@ func main() {
         ballImage := go2d.NewCircleImageEntity("#FFFFFF", int(BALL_SIZE))
         ball := &Ball{
             ImageEntity: ballImage,
-            aiSpeed: AI_BALL_SPEED,
         }
 
         ball.Respawn(engine, go2d.DirectionRight())
 
         scene.AddNamedEntity("ball", 2, ball)
     }
+
+    scene.RenderFPS("../test_resources/font.ttf", 24, "#ff0000")
 
     engine.SetScene(&scene)
     engine.HideCursor = true

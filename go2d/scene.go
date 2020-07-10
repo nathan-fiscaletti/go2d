@@ -9,11 +9,14 @@ import(
 
 type Scene struct {
     Name          string
-    LoadResources func(engine *Engine, scene *Scene)
+    Initialize    func(engine *Engine, scene *Scene)
 
     PreRender     func(engine *Engine, scene *Scene)
     Render        func(engine *Engine, scene *Scene)
     Update        func(engine *Engine, scene *Scene)
+
+    renderFPS     bool
+    fpsEntity     *TextEntity
 
     engine        *Engine
     resources     map[string]interface{}
@@ -57,6 +60,15 @@ func NewScene(engine *Engine, name string) Scene {
         entities: map[int]map[string]interface{}{},
         Name: name,
     }
+}
+
+func (this *Scene) RenderFPS(font string, size float64, color string) {
+    this.renderFPS = true
+    this.fpsEntity = NewTextEntity("FPS: 0", font, size, color)
+}
+
+func (this *Scene) StopRenderingFPS() {
+    this.renderFPS = false
 }
 
 func (this *Scene) AddTimer(name string, t *Timer) {
@@ -199,6 +211,10 @@ func (this *Scene) performUpdate(engine *Engine) {
     if this.Update != nil {
         this.Update(engine, this)
     }
+
+    if this.renderFPS {
+        this.fpsEntity.SetText(fmt.Sprintf("FPS: %v", engine.GetFPS()))
+    }
 }
 
 func (this *Scene) performRender(engine *Engine) {
@@ -215,6 +231,10 @@ func (this *Scene) performRender(engine *Engine) {
 
     if this.Render != nil {
         this.Render(engine, this)
+    }
+
+    if this.renderFPS {
+        this.fpsEntity.Render(engine)
     }
 }
 

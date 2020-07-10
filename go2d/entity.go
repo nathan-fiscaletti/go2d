@@ -19,7 +19,7 @@ type IConstrained interface {
 type Entity struct {
     Visible    bool
     Bounds     Rect
-    Velocity   Vector
+    Velocity   VelocityVector
 }
 
 func (this *Entity) CollidesWith(other *Entity) bool {
@@ -36,5 +36,5 @@ func (this *Entity) Push(distance Vector) {
 }
 
 func (this *Entity) Update() {
-    this.Push(this.Velocity)
+    this.Push(this.Velocity.GetNextMovement())
 }
