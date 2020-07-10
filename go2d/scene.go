@@ -207,6 +207,26 @@ func (this *Scene) performUpdate(engine *Engine) {
             e.(IUpdate).Update(engine)
         }
     })
+
+    // Handle Collision
+    this.iterateEntities(func (s *Scene, e interface{}) {
+        _,isCollisionDetection := e.(ICollisionDetection)
+        _,isCollidable := e.(ICollidable)
+        if isCollisionDetection && isCollidable {
+            this.iterateEntities(func (s2 *Scene, e2 interface{}) {
+                if e2 != e {
+                    _,isCollidable2 := e2.(ICollidable)
+                    if isCollidable2 {
+                        if e.(ICollidable).GetCollider().IntersectsWith(
+                            e2.(ICollidable).GetCollider(),
+                        ) {
+                            e.(ICollisionDetection).CollidedWith(e2)
+                        }
+                    }
+                }
+            })
+        }
+    })
     
     if this.Update != nil {
         this.Update(engine, this)

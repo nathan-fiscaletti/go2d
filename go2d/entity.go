@@ -16,6 +16,14 @@ type IConstrained interface {
     Constrained(s RectSide)
 }
 
+type ICollidable interface {
+    GetCollider() Rect
+}
+
+type ICollisionDetection interface {
+    CollidedWith(other interface{})
+}
+
 type Entity struct {
     Visible    bool
     Bounds     Rect

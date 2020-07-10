@@ -15,11 +15,11 @@ var AI_PADDLE_RATE           float64       = 5
 var AI_PADDLE_TIME           time.Duration = go2d.TICK_DURATION
 var AI_BALL_RATE             float64       = 20
 var AI_BALL_TIME             time.Duration = go2d.TICK_DURATION
-
 var PLAYER_CONTROL_MOUSE     bool          = false
 var PLAYER_CONTROL_KEY       bool          = true
-var PLAYER_PADDLE_RATE       float64       = 10
+var PLAYER_PADDLE_RATE       float64       = AI_PADDLE_RATE * 2
 var PLAYER_PADDLE_TIME       time.Duration = go2d.TICK_DURATION
+
 
 // Used by the game during run time
 var PLAYER_PADDLE_MULTIPLIER float64       = 0
