@@ -32,6 +32,7 @@ func NewEngine(name string, dimensions Dimensions) *Engine {
         renderMux: sync.Mutex{},
     }
 
+    sdl.SetHint(sdl.HINT_VIDEO_HIGHDPI_DISABLED, "1")
     wnd, cv, err := sdlcanvas.CreateWindow(int(engine.Dimensions.Width), int(engine.Dimensions.Height), engine.Name)
     if err != nil {
         panic(err)
