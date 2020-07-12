@@ -133,3 +133,7 @@ func (this *TextEntity) Render(e *Engine) {
 func (this *TextEntity) Update(e *Engine) {
     this.Entity.Update()
 }
+
+func (this *TextEntity) GetEntity() *Entity {
+    return &this.Entity
+}

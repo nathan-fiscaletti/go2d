@@ -56,7 +56,7 @@ func (this *Shooter) Shoot() {
         X: this.Bounds.X + (this.Bounds.Width / 2) - BULLET_SIZE / 2,
         Y: this.Bounds.Y,
     })
-    bullet.key = go2d.GetActiveScene().AddEntity(BULLET_LAYER, bullet)
+    bullet.key = go2d.GetActiveScene().Add(BULLET_LAYER, bullet)
 }
 
 type Projectile struct {
@@ -81,7 +81,7 @@ func (this *Projectile) CollidedWith(other interface{}) {
 }
 
 func (this *Projectile) Remove() {
-    go2d.GetActiveScene().RemoveEntity(BULLET_LAYER, this.key)
+    go2d.GetActiveScene().Remove(BULLET_LAYER, this.key)
 }
 
 // Maintain a list of active enemies
@@ -108,7 +108,7 @@ func (this *Enemy) GetCollider() go2d.Rect {
 // Remove will remove the Enemy from it's owning scene.
 func (this *Enemy) Remove() {
     delete(activeEnemies, this.key)
-    go2d.GetActiveScene().RemoveEntity(ENEMY_LAYER, this.key)
+    go2d.GetActiveScene().Remove(ENEMY_LAYER, this.key)
 }
 
 // SpawnEnemy spawns a single enemy at the top of the screen with a random X location.
@@ -124,7 +124,7 @@ func SpawnEnemy(engine *go2d.Engine) {
     })
 
     enemy.Velocity = go2d.NewVelocityVector(0, ENEMY_SPEED, go2d.TICK_DURATION)
-    enemy.key = engine.GetScene().AddEntity(ENEMY_LAYER, enemy)
+    enemy.key = engine.GetScene().Add(ENEMY_LAYER, enemy)
     activeEnemies[enemy.key] = enemy
 }
 
@@ -158,7 +158,7 @@ func main() {
         )
 
         // Add them to the scene
-        scene.AddNamedEntity("player", 1, player)
+        scene.AddNamed("player", 1, player)
     }
 
     // Spawn a new enemy every 0.5 seconds.

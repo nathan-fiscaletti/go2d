@@ -85,3 +85,6 @@ func (this *LineEntity) Update(e *Engine) {
     this.Entity.Update()
 }
 
+func (this *LineEntity) GetEntity() *Entity {
+    return &this.Entity
+}

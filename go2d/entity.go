@@ -24,6 +24,10 @@ type ICollisionDetection interface {
     CollidedWith(other interface{})
 }
 
+type IEntity interface {
+    GetEntity() *Entity
+}
+
 type Entity struct {
     Visible    bool
     Bounds     Rect

@@ -102,3 +102,7 @@ func (this *ImageEntity) Render(e *Engine) {
 func (this *ImageEntity) Update(e *Engine) {
     this.Entity.Update()
 }
+
+func (this *ImageEntity) GetEntity() *Entity {
+    return &this.Entity
+}
