@@ -1,19 +1,26 @@
 package main
 
 import(
+    "math/rand"
     "../go2d"
 )
+
+// Move with the Left/Right arrow keys
+// Shoot by pressing Space
+
+const ENEMY_LAYER  = 0
+const ENEMY_SIZE   = PLAYER_SIZE
+const ENEMY_SPEED  = 3
+const ENEMY_RAIL   = PLAYER_RAIL
 
 const PLAYER_SIZE  = 48
 const PLAYER_SPEED = 10
 const PLAYER_RAIL  = 16
+const PLAYER_LAYER = 1
+
 const BULLET_SIZE  = 32
 const BULLET_SPEED = 10
-const PLAYER_LAYER = 1
 const BULLET_LAYER = 0
-const ENEMY_LAYER  = 0
-const ENEMY_SIZE   = PLAYER_SIZE
-const ENEMY_RAIL   = PLAYER_RAIL
 
 type Shooter struct {
     *go2d.ImageEntity
@@ -104,29 +111,21 @@ func (this *Enemy) Remove() {
     go2d.GetActiveScene().RemoveEntity(ENEMY_LAYER, this.key)
 }
 
-// AddEnemyRow moves all existing enemies down by one grid element and spawns a new
-// row of enemies.
-func AddEnemyRow(engine *go2d.Engine) {
-    for _,e := range activeEnemies {
-        e.MoveTo(go2d.Vector{
-            X: e.Bounds.X,
-            Y: e.Bounds.Y + ENEMY_SIZE,
-        })
+// SpawnEnemy spawns a single enemy at the top of the screen with a random X location.
+func SpawnEnemy(engine *go2d.Engine) {
+    enemyImage := go2d.NewCircleImageEntity("#0000FF", ENEMY_SIZE)
+    enemy := &Enemy{
+        ImageEntity: enemyImage,
     }
 
-    enemyRowCount := int(engine.Bounds().Width / (ENEMY_SIZE))
-    for i := 0; i < enemyRowCount; i++ {
-        enemyImage := go2d.NewCircleImageEntity("#0000FF", ENEMY_SIZE)
-        enemy := &Enemy{
-            ImageEntity: enemyImage,
-        }
-        enemy.MoveTo(go2d.Vector{
-            X: float64(i * ENEMY_SIZE),
-            Y: 0,
-        })
-        enemy.key = engine.GetScene().AddEntity(ENEMY_LAYER, enemy)
-        activeEnemies[enemy.key] = enemy
-    }
+    enemy.MoveTo(go2d.Vector{
+        X: rand.Float64() * (engine.Bounds().Width - ENEMY_SIZE),
+        Y: -ENEMY_SIZE,
+    })
+
+    enemy.Velocity = go2d.NewVelocityVector(0, ENEMY_SPEED, go2d.TICK_DURATION)
+    enemy.key = engine.GetScene().AddEntity(ENEMY_LAYER, enemy)
+    activeEnemies[enemy.key] = enemy
 }
 
 func main() {
@@ -162,11 +161,11 @@ func main() {
         scene.AddNamedEntity("player", 1, player)
     }
 
-    // Spawn a new row of enemies every two seconds.
+    // Spawn a new enemy every 0.5 seconds.
     scene.AddTimer("EnemySpawner", &go2d.Timer{
-        Seconds: 2,
+        Seconds: 0.5,
         Update: func(owner interface{}) {
-            AddEnemyRow(engine)
+            SpawnEnemy(engine)
         },
     })
 
