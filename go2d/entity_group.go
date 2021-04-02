@@ -25,7 +25,7 @@ func NewEntityGroup() *EntityGroup {
     }
 }
 
-func (this *EntityGroup) Add(layer int, ent interface{}) string {
+func (this *EntityGroup) AddEntity(layer int, ent interface{}) string {
     n := time.Now().UnixNano()
     r := rand.New(rand.NewSource(n))
     id := fmt.Sprintf("entity_%v.%v", n, r.Intn(10000))
@@ -36,14 +36,14 @@ func (this *EntityGroup) Add(layer int, ent interface{}) string {
     return id
 }
 
-func (this *EntityGroup) AddNamed(name string, layer int, ent interface{}) {
+func (this *EntityGroup) AddNamedEntity(name string, layer int, ent interface{}) {
     if _,layerExists := this.entities[layer]; !layerExists {
         this.entities[layer] = map[string]interface{}{}
     }
     this.entities[layer][name] = ent
 }
 
-func (this *EntityGroup) Get(layer int, name string) interface{} {
+func (this *EntityGroup) GetEntity(layer int, name string) interface{} {
     if _,layerExists := this.entities[layer]; layerExists {
         if _,entityExists := this.entities[layer][name]; entityExists {
             return this.entities[layer][name]
@@ -53,11 +53,11 @@ func (this *EntityGroup) Get(layer int, name string) interface{} {
     return nil
 }
 
-func (this *EntityGroup) Remove(layer int, name string) {
+func (this *EntityGroup) RemoveEntity(layer int, name string) {
     delete(this.entities[layer], name)
 }
 
-func (this *EntityGroup) Clear() {
+func (this *EntityGroup) ClearEntities() {
     for k := range this.entities {
         delete(this.entities, k)
     }
@@ -105,6 +105,6 @@ func (this *EntityGroup) Update(engine *Engine) {
     this.Entity.Update()
 }
 
-func (this *EntityGroup) GetEntity() *Entity {
+func (this *EntityGroup) GetEntityGroupEntity() *Entity {
     return &this.Entity
 }
