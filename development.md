@@ -1,6 +1,6 @@
 # Go2D - Developer Documentation
 
-> ⚠️  WiP / Incomplete
+> ⚠️   WiP / Incomplete
 
 ## Requirements
 
